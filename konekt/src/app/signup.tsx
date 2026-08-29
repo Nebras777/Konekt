@@ -6,14 +6,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 
-import { setCurrentProfile } from '../../services/currentProfile';
 import { createProfile } from '../../services/profiles';
 
 export default function SignUpScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { signIn } = useAuth();
 
   const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -27,14 +28,10 @@ export default function SignUpScreen() {
     setSubmitError(null);
     try {
       const profile = await createProfile(name.trim());
-      await setCurrentProfile(profile);
-      // If signup was reached directly (deep link, or a refresh while on
-      // this screen) there's no history to go back to.
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace('/people');
-      }
+      await signIn(profile);
+      // Signing in flips the Stack.Protected guard in _layout.tsx, making
+      // (tabs) reachable — replace so signup/welcome aren't left in history.
+      router.replace('/');
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'Could not create your profile');
       setSubmitting(false);

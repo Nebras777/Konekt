@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -70,7 +70,6 @@ function ContactRow({
 }
 
 export default function PeopleScreen() {
-  const router = useRouter();
   // null = still loading, [] = loaded but empty
   const [contacts, setContacts] = useState<Connection[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,18 +112,7 @@ export default function PeopleScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <ThemedText type="title">People</ThemedText>
-          <Pressable onPress={() => router.push('/signup')} accessibilityRole="button">
-            {({ pressed }) => (
-              <ThemedView
-                type="backgroundSelected"
-                style={[styles.headerAction, pressed && styles.pressed]}>
-                <ThemedText type="smallBold">+ Create profile</ThemedText>
-              </ThemedView>
-            )}
-          </Pressable>
-        </View>
+        <ThemedText type="title">People</ThemedText>
 
         {contacts === null ? (
           <View style={styles.centre}>
@@ -166,16 +154,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.five,
     paddingBottom: BottomTabInset + Spacing.three,
     gap: Spacing.four,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerAction: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.four,
   },
   centre: {
     flex: 1,
