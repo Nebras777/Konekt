@@ -69,7 +69,8 @@ export async function fillMissingPhotos(
 ): Promise<PlaceVisit[]> {
   return Promise.all(
     places.map(async (place) => {
-      if (place.photoUrl) return place;
+      // A real photo/video the user picked always wins over a stock fallback.
+      if (place.photoUrl || place.mediaUri) return place;
       return { ...place, photoUrl: await getFallbackPhoto(place.type) };
     }),
   );

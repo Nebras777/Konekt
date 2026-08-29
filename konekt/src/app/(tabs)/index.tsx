@@ -1,21 +1,73 @@
+import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
+import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
 import { mockRoute } from '@/constants/mockRoute';
+import { BottomTabInset, Spacing } from '@/constants/theme';
+import type { PlaceVisit } from '@/constants/types';
+
+import { setTodayPlaces } from '../../../services/todayDraft';
+
+type AttachedMedia = { uri: string; type: 'photo' | 'video' };
 
 export default function TodayScreen() {
   const router = useRouter();
+  const [media, setMedia] = useState<Record<number, AttachedMedia>>({});
+
+  const photoCount =
+    mockRoute.filter((place) => place.photoUrl).length +
+    Object.keys(media).length;
 
   const stats = {
     stops: String(mockRoute.length),
-    photos: String(mockRoute.filter((place) => place.photoUrl).length),
+    photos: String(photoCount),
   };
+
+  async function attachMedia(index: number) {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Photo access needed', 'Allow photo library access to attach a photo or video.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      quality: 0.8,
+    });
+
+    if (result.canceled || result.assets.length === 0) return;
+
+    const asset = result.assets[0];
+    setMedia((prev) => ({
+      ...prev,
+      [index]: { uri: asset.uri, type: asset.type === 'video' ? 'video' : 'photo' },
+    }));
+  }
+
+  function removeMedia(index: number) {
+    setMedia((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+  }
+
+  function handleMakeRecap() {
+    const placesWithMedia: PlaceVisit[] = mockRoute.map((place, index) => {
+      const attached = media[index];
+      if (!attached) return place;
+      return { ...place, mediaUri: attached.uri, mediaType: attached.type };
+    });
+    setTodayPlaces(placesWithMedia);
+    router.push('/building');
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -33,18 +85,46 @@ export default function TodayScreen() {
           </View>
 
           <View style={styles.stopsList}>
-            {mockRoute.map((place, index) => (
-              <DayCard
-                key={`${place.name}-${index}`}
-                time={place.time}
-                title={place.name}
-                subtitle={place.subtitle}
-              />
-            ))}
+            {mockRoute.map((place, index) => {
+              const attached = media[index];
+              return (
+                <DayCard
+                  key={`${place.name}-${index}`}
+                  time={place.time}
+                  title={place.name}
+                  subtitle={place.subtitle}>
+                  {attached ? (
+                    <>
+                      <PhotoGrid photos={[attached]} />
+                      <Pressable onPress={() => removeMedia(index)} accessibilityRole="button">
+                        {({ pressed }) => (
+                          <ThemedText
+                            type="small"
+                            themeColor="textSecondary"
+                            style={pressed ? styles.pressed : undefined}>
+                            Remove
+                          </ThemedText>
+                        )}
+                      </Pressable>
+                    </>
+                  ) : (
+                    <Pressable onPress={() => attachMedia(index)} accessibilityRole="button">
+                      {({ pressed }) => (
+                        <ThemedView
+                          type="backgroundSelected"
+                          style={[styles.attachButton, pressed && styles.pressed]}>
+                          <ThemedText type="small">+ Add photo or video</ThemedText>
+                        </ThemedView>
+                      )}
+                    </Pressable>
+                  )}
+                </DayCard>
+              );
+            })}
           </View>
         </ScrollView>
 
-        <Pressable onPress={() => router.push('/building')} accessibilityRole="button">
+        <Pressable onPress={handleMakeRecap} accessibilityRole="button">
           {({ pressed }) => (
             <ThemedView
               type="backgroundSelected"
@@ -101,6 +181,11 @@ const styles = StyleSheet.create({
   },
   stopsList: {
     gap: Spacing.two,
+  },
+  attachButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.two,
+    borderRadius: Spacing.three,
   },
   recapButton: {
     alignItems: 'center',

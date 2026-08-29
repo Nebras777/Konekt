@@ -1,6 +1,19 @@
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from 'expo-audio';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
@@ -8,12 +21,16 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
 import { Spacing } from '@/constants/theme';
 import { DEMO_USERS, type DaySummary } from '@/constants/types';
+import { useTheme } from '@/hooks/use-theme';
+import { mediaForPlace } from '@/utils/placeMedia';
 
 import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
 import { getDaySummaryById, saveDaySummary } from '../../../services/firestore';
 import { totalDistanceKm } from '../../../services/sendRecap';
+import { uploadLocalFile } from '../../../services/storage';
 
 const DUMMY_DAY_SUMMARY: DaySummary = {
   id: 'demo-day-1',
@@ -79,9 +96,35 @@ export type RecapScreenContentProps = {
 
 export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreenContentProps) {
   const router = useRouter();
+  const theme = useTheme();
   const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+
+  const [note, setNote] = useState(daySummary.highlightNote ?? '');
+  const [localVoiceUri, setLocalVoiceUri] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+
+  async function startRecording() {
+    setRecordingError(null);
+    const permission = await requestRecordingPermissionsAsync();
+    if (!permission.granted) {
+      setRecordingError('Microphone access is needed to record a voice note.');
+      return;
+    }
+    await setAudioModeAsync({ playsInSilentMode: true, allowsRecording: true });
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+    setIsRecording(true);
+  }
+
+  async function stopRecording() {
+    await recorder.stop();
+    setLocalVoiceUri(recorder.uri);
+    setIsRecording(false);
+  }
 
   function toggleExcluded(index: number) {
     setExcludedStops((prev) => {
@@ -99,7 +142,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   // a stop the sender has hidden must not still show up for the recipient.
   const visiblePlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
   const distanceKm = readOnly ? daySummary.distanceKm : totalDistanceKm(visiblePlaces);
-  const photoCount = visiblePlaces.filter((place) => place.photoUrl).length;
+  const photoCount = visiblePlaces.filter((place) => place.photoUrl || place.mediaUri).length;
 
   function handleCancel() {
     clearDraftRecap(daySummary.id);
@@ -110,10 +153,16 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
     setSending(true);
     setSendError(null);
     try {
+      const voiceNoteUrl = localVoiceUri
+        ? await uploadLocalFile(localVoiceUri, `voiceNotes/${daySummary.id}.m4a`)
+        : daySummary.voiceNoteUrl;
+
       await saveDaySummary({
         ...daySummary,
         places: visiblePlaces,
         distanceKm: totalDistanceKm(visiblePlaces),
+        highlightNote: note.trim() || undefined,
+        voiceNoteUrl,
       });
       clearDraftRecap(daySummary.id);
       router.replace('/');
@@ -151,10 +200,61 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
                 subtitle={place.subtitle}
                 excluded={excludedStops.has(index)}
                 onToggleExclude={readOnly ? undefined : () => toggleExcluded(index)}>
-                {place.photoUrl ? <PhotoGrid photos={[place.photoUrl]} /> : null}
+                <PhotoGrid photos={mediaForPlace(place)} />
               </DayCard>
             ))}
           </View>
+
+          {readOnly ? (
+            <>
+              {daySummary.highlightNote ? (
+                <ThemedView type="backgroundElement" style={styles.noteCard}>
+                  <ThemedText type="smallBold">Highlight</ThemedText>
+                  <ThemedText themeColor="textSecondary">{daySummary.highlightNote}</ThemedText>
+                </ThemedView>
+              ) : null}
+              {daySummary.voiceNoteUrl ? (
+                <VoiceNotePlayer uri={daySummary.voiceNoteUrl} />
+              ) : null}
+            </>
+          ) : (
+            <View style={styles.noteSection}>
+              <ThemedText type="smallBold">Add a highlight (optional)</ThemedText>
+              <TextInput
+                value={note}
+                onChangeText={setNote}
+                placeholder="What was the best part of your day?"
+                placeholderTextColor={theme.textSecondary}
+                multiline
+                style={[
+                  styles.noteInput,
+                  { color: theme.text, backgroundColor: theme.backgroundElement },
+                ]}
+              />
+
+              {recordingError ? (
+                <ThemedText themeColor="textSecondary">{recordingError}</ThemedText>
+              ) : null}
+
+              {localVoiceUri ? (
+                <VoiceNotePlayer uri={localVoiceUri} />
+              ) : (
+                <Pressable
+                  onPress={isRecording ? stopRecording : startRecording}
+                  accessibilityRole="button">
+                  {({ pressed }) => (
+                    <ThemedView
+                      type="backgroundElement"
+                      style={[styles.recordButton, pressed && styles.pressed]}>
+                      <ThemedText type="smallBold">
+                        {isRecording ? '⏹ Stop recording' : '🎙 Record a voice note'}
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+                </Pressable>
+              )}
+            </View>
+          )}
 
           {!readOnly ? (
             <View style={styles.actionsSection}>
@@ -312,6 +412,25 @@ const styles = StyleSheet.create({
   },
   stopsList: {
     gap: Spacing.two,
+  },
+  noteCard: {
+    borderRadius: Spacing.four,
+    padding: Spacing.four,
+    gap: Spacing.one,
+  },
+  noteSection: {
+    gap: Spacing.two,
+  },
+  noteInput: {
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    minHeight: 70,
+    textAlignVertical: 'top',
+  },
+  recordButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.four,
   },
   actionsSection: {
     gap: Spacing.two,

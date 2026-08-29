@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 import { setDraftRecap } from '../../services/draftRecap';
 import { buildDayRecap } from '../../services/sendRecap';
+import { getTodayPlaces } from '../../services/todayDraft';
 
 const STEPS = [
   'Gathering today’s stops',
@@ -44,7 +45,7 @@ export default function BuildingScreen() {
       ),
     );
 
-    buildDayRecap(mockRoute)
+    buildDayRecap(getTodayPlaces() ?? mockRoute)
       .then((summary) => {
         if (cancelled) return;
         setCompletedCount(STEPS.length);

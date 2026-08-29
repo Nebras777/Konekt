@@ -32,7 +32,20 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Konekt needs access to your photos so you can attach one to a stop."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Konekt needs access to your microphone to record a voice memo for your recap."
+        }
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

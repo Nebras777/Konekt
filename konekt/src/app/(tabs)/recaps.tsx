@@ -7,8 +7,10 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import { DEMO_USERS, type DaySummary } from '@/constants/types';
+import { mediaForPlace } from '@/utils/placeMedia';
 
 import { getInbox } from '../../../services/firestore';
 
@@ -62,7 +64,7 @@ export default function RecapsScreen() {
 
 /** One received recap, rendered read-only, with a reaction row on top. */
 function InboxRecap({ summary }: { summary: DaySummary }) {
-  const photoCount = summary.places.filter((place) => place.photoUrl).length;
+  const photoCount = summary.places.filter((place) => place.photoUrl || place.mediaUri).length;
 
   return (
     <ThemedView type="backgroundElement" style={styles.recapCard}>
@@ -83,6 +85,14 @@ function InboxRecap({ summary }: { summary: DaySummary }) {
       <ThemedText type="subtitle">{summary.userId}&apos;s day</ThemedText>
       <ThemedText themeColor="textSecondary">{summary.summaryText}</ThemedText>
 
+      {summary.highlightNote ? (
+        <ThemedView type="backgroundSelected" style={styles.noteCard}>
+          <ThemedText type="smallBold">Highlight</ThemedText>
+          <ThemedText themeColor="textSecondary">{summary.highlightNote}</ThemedText>
+        </ThemedView>
+      ) : null}
+      {summary.voiceNoteUrl ? <VoiceNotePlayer uri={summary.voiceNoteUrl} /> : null}
+
       <View style={styles.statsRow}>
         <Stat label="km" value={summary.distanceKm?.toFixed(1) ?? '—'} />
         <Stat label="stops" value={String(summary.places.length)} />
@@ -102,7 +112,7 @@ function InboxRecap({ summary }: { summary: DaySummary }) {
             time={place.time}
             title={place.name}
             subtitle={place.subtitle}>
-            {place.photoUrl ? <PhotoGrid photos={[place.photoUrl]} /> : null}
+            <PhotoGrid photos={mediaForPlace(place)} />
           </DayCard>
         ))}
       </View>
@@ -170,6 +180,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.two,
     borderRadius: Spacing.four,
+  },
+  noteCard: {
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.half,
   },
   statsRow: {
     flexDirection: 'row',
