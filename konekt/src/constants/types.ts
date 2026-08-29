@@ -32,8 +32,6 @@ export type DaySummary = {
   createdAt: number;
   /** A personal note the sender adds on top of the AI-written summary. */
   highlightNote?: string;
-  /** URL of a recorded voice memo attached to this recap, if any. */
-  voiceNoteUrl?: string;
 };
 
 export const DEMO_USERS = {

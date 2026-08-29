@@ -7,7 +7,6 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import { DEMO_USERS, type DaySummary } from '@/constants/types';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -91,7 +90,6 @@ function InboxRecap({ summary }: { summary: DaySummary }) {
           <ThemedText themeColor="textSecondary">{summary.highlightNote}</ThemedText>
         </ThemedView>
       ) : null}
-      {summary.voiceNoteUrl ? <VoiceNotePlayer uri={summary.voiceNoteUrl} /> : null}
 
       <View style={styles.statsRow}>
         <Stat label="km" value={summary.distanceKm?.toFixed(1) ?? '—'} />
