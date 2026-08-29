@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -6,18 +6,63 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+
+import {
+  DEFAULT_PRIVACY_SETTINGS,
+  getPrivacySettings,
+  savePrivacySettings,
+  type PrivacySettings,
+} from '../../../services/privacySettings';
 import { useTheme } from '@/hooks/use-theme';
 
-const TOGGLES = [
-  'Share location with family',
-  'Share location with friends',
-  'Include photos in recaps',
+const TOGGLES: { key: keyof PrivacySettings; label: string; hint?: string }[] = [
+  {
+    key: 'shareLocationWithFamily',
+    label: 'Share location with family',
+    hint: 'Off: people you filed as Family get your recap without the map or stops.',
+  },
+  {
+    key: 'shareLocationWithFriends',
+    label: 'Share location with friends',
+    hint: 'Off: people you filed as Friends get your recap without the map or stops.',
+  },
+  { key: 'includePhotos', label: 'Include photos in recaps' },
 ];
 
 export default function PrivacyScreen() {
   const theme = useTheme();
   const { profile, signOut } = useAuth();
-  const [values, setValues] = useState<boolean[]>([false, false, false]);
+  const [settings, setSettings] = useState<PrivacySettings>(DEFAULT_PRIVACY_SETTINGS);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!profile) return;
+    let cancelled = false;
+    getPrivacySettings(profile.id)
+      .then((stored) => {
+        if (!cancelled) setSettings(stored);
+      })
+      .finally(() => {
+        if (!cancelled) setLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [profile]);
+
+  const toggle = useCallback(
+    async (key: keyof PrivacySettings) => {
+      if (!profile) return;
+      const next = { ...settings, [key]: !settings[key] };
+      setSettings(next); // optimistic — a switch should move under the thumb
+      try {
+        await savePrivacySettings(profile.id, next);
+      } catch {
+        setSettings(settings); // put it back if the write failed
+      }
+    },
+    [profile, settings],
+  );
 
   function confirmSignOut() {
     Alert.alert(
@@ -30,10 +75,6 @@ export default function PrivacyScreen() {
     );
   }
 
-  const toggle = (index: number) => {
-    setValues((prev) => prev.map((value, i) => (i === index ? !value : value)));
-  };
-
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -44,9 +85,9 @@ export default function PrivacyScreen() {
           </ThemedText>
         </View>
         <ThemedView type="backgroundElement" style={styles.card}>
-          {TOGGLES.map((label, index) => (
+          {TOGGLES.map(({ key, label, hint }, index) => (
             <View
-              key={label}
+              key={key}
               style={[
                 styles.row,
                 index !== TOGGLES.length - 1 && {
@@ -54,12 +95,18 @@ export default function PrivacyScreen() {
                   borderBottomColor: theme.backgroundSelected,
                 },
               ]}>
-              <ThemedText type="default" style={styles.rowLabel}>
-                {label}
-              </ThemedText>
+              <View style={styles.rowLabel}>
+                <ThemedText type="default">{label}</ThemedText>
+                {hint && !settings[key] ? (
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {hint}
+                  </ThemedText>
+                ) : null}
+              </View>
               <Switch
-                value={values[index]}
-                onValueChange={() => toggle(index)}
+                value={settings[key]}
+                onValueChange={() => toggle(key)}
+                disabled={!loaded || !profile}
                 trackColor={{ true: theme.primary }}
               />
             </View>
@@ -126,5 +173,6 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     flex: 1,
+    gap: Spacing.half,
   },
 });

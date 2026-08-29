@@ -213,6 +213,12 @@ function InboxRecap({
         <Stat label="photos" value={String(photoCount)} />
       </View>
 
+      {summary.locationHidden ? (
+        <ThemedText type="small" themeColor="textSecondary">
+          {summary.senderName ?? 'They'} kept their location private for this recap.
+        </ThemedText>
+      ) : null}
+
       {summary.places.length > 0 ? (
         <View style={styles.mapContainer}>
           <RouteMap places={summary.places} interactive={false} />

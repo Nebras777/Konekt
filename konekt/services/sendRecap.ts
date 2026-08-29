@@ -2,6 +2,7 @@ import type { DaySummary, PlaceVisit } from '../src/constants/types';
 import { DEMO_USERS } from '../src/constants/types';
 import { generateDaySummary } from './aiSummary';
 import { getContacts } from './contacts';
+import { getPrivacySettings } from './privacySettings';
 import { getCurrentProfile } from './currentProfile';
 import { saveDaySummary } from './firestore';
 import { fillMissingPhotos } from './unsplash';
@@ -97,18 +98,36 @@ export async function sendRecapToConnections(
   summary: DaySummary,
   ownerId: string,
 ): Promise<{ delivered: number; pending: number }> {
-  const contacts = await getContacts(ownerId);
+  const [contacts, privacy] = await Promise.all([
+    getContacts(ownerId),
+    getPrivacySettings(ownerId),
+  ]);
   const recipients = contacts.filter((c) => c.status === 'active' && c.profileId);
   const pending = contacts.filter((c) => c.status === 'pending').length;
 
   await Promise.all(
-    recipients.map((contact) =>
-      saveDaySummary({
-        ...summary,
+    recipients.map((contact) => {
+      const group = contact.group ?? 'other';
+      const shareLocation =
+        group === 'family'
+          ? privacy.shareLocationWithFamily
+          : group === 'friends'
+            ? privacy.shareLocationWithFriends
+            : true;
+
+      // Withheld location is omitted from the document, not hidden in the UI.
+      // Writing the stops and asking the recipient's app not to draw them would
+      // still put the sender's movements in a database that recipient can read.
+      const payload: DaySummary = shareLocation
+        ? summary
+        : { ...summary, places: [], distanceKm: undefined, locationHidden: true };
+
+      return saveDaySummary({
+        ...payload,
         id: `${summary.id}__${contact.profileId}`,
         recipientId: contact.profileId as string,
-      }),
-    ),
+      });
+    }),
   );
 
   return { delivered: recipients.length, pending };

@@ -38,6 +38,12 @@ export type DaySummary = {
    * because recaps sent before profiles existed don't have it.
    */
   senderName?: string;
+  /**
+   * True when the sender's privacy settings withheld location from this
+   * recipient's copy. The stops are not stripped from the UI — they were never
+   * written to this document, so there is nothing to reveal.
+   */
+  locationHidden?: boolean;
 };
 
 export const DEMO_USERS = {
