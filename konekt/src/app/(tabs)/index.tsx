@@ -127,6 +127,11 @@ export default function TodayScreen() {
         <View style={styles.headerRow}>
           <View style={styles.logoPlate}>
             <Image
+              source={require('@/assets/images/logo-mark.png')}
+              style={styles.logoMark}
+              contentFit="contain"
+            />
+            <Image
               source={require('@/assets/images/logo-wordmark.png')}
               style={styles.logo}
               contentFit="contain"
@@ -348,12 +353,26 @@ const styles = StyleSheet.create({
      */
     backgroundColor: 'rgba(255,255,255,0.92)',
     borderRadius: Radii.pill,
-    paddingHorizontal: Spacing.three,
+    // Tighter on the left: the mark's artwork already carries its own padding,
+    // so an equal inset on both sides looks lopsided.
+    paddingLeft: Spacing.two,
+    paddingRight: Spacing.three,
     paddingVertical: Spacing.two,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
     shadowColor: 'rgba(255,255,255,0.65)',
     shadowOpacity: 1,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
+  },
+  logoMark: {
+    /**
+     * Square, and sized to the wordmark's cap height rather than its box, so
+     * the two read as one lockup instead of a big K beside small letters.
+     */
+    width: 26,
+    height: 26,
   },
   logo: {
     height: 26,

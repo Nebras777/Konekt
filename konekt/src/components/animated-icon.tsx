@@ -32,7 +32,16 @@ export function AnimatedSplashOverlay() {
     },
   });
 
-  const image = <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />;
+  // The template's Expo logo, replaced with the app's own mark. The overlay
+  // covers the native splash while it hands over, so the two have to match or
+  // the handover flashes a different image.
+  const image = (
+    <Image
+      style={styles.image}
+      contentFit="contain"
+      source={require('@/assets/images/logo-mark.png')}
+    />
+  );
 
   return animate ? (
     <Animated.View
@@ -60,12 +69,12 @@ export function AnimatedSplashOverlay() {
 
 const styles = StyleSheet.create({
   image: {
-    width: 76,
-    height: 71,
+    width: 140,
+    height: 140,
   },
   splashOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#208AEF',
+    backgroundColor: '#141633',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
