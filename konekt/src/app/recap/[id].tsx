@@ -83,10 +83,6 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
-  // Excluded stops are dropped from the map too. A stop the sender has hidden from
-  // the recap must not still be plotted for the recipient to see.
-  const mappedPlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
-
   function toggleExcluded(index: number) {
     setExcludedStops((prev) => {
       const next = new Set(prev);
@@ -99,6 +95,8 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
     });
   }
 
+  // Excluded stops are dropped from stats, the map, and what actually gets sent —
+  // a stop the sender has hidden must not still show up for the recipient.
   const visiblePlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
   const distanceKm = readOnly ? daySummary.distanceKm : totalDistanceKm(visiblePlaces);
   const photoCount = visiblePlaces.filter((place) => place.photoUrl).length;
@@ -138,9 +136,9 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
             <Stat label="photos" value={String(photoCount)} />
           </View>
 
-          {mappedPlaces.length > 0 ? (
+          {visiblePlaces.length > 0 ? (
             <View style={styles.mapContainer}>
-              <RouteMap places={mappedPlaces} interactive={false} />
+              <RouteMap places={visiblePlaces} interactive={false} />
             </View>
           ) : null}
 
