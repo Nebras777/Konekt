@@ -1,7 +1,9 @@
 import {
   collection,
-  addDoc,
+  doc,
+  getDoc,
   query,
+  setDoc,
   where,
   getDocs,
 } from 'firebase/firestore';
@@ -11,12 +13,21 @@ import type { DaySummary } from '../src/constants/types';
 const COLLECTION = 'day_summaries';
 
 /**
- * Save a full day summary to Firestore.
- * Returns the generated document id.
+ * Save a full day summary to Firestore, keyed by its own `id` field so it can
+ * be looked up later with getDaySummaryById.
+ * Returns the summary's id.
  */
 export async function saveDaySummary(summary: DaySummary): Promise<string> {
-  const ref = await addDoc(collection(db, COLLECTION), summary);
-  return ref.id;
+  await setDoc(doc(db, COLLECTION, summary.id), summary);
+  return summary.id;
+}
+
+/**
+ * Get a single day summary by id, or null if it doesn't exist.
+ */
+export async function getDaySummaryById(id: string): Promise<DaySummary | null> {
+  const snap = await getDoc(doc(db, COLLECTION, id));
+  return snap.exists() ? (snap.data() as DaySummary) : null;
 }
 
 /**

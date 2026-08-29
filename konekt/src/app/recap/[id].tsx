@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
@@ -10,6 +10,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { DEMO_USERS, type DaySummary } from '@/constants/types';
+
+import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
+import { getDaySummaryById, saveDaySummary } from '../../../services/firestore';
+import { totalDistanceKm } from '../../../services/sendRecap';
 
 const DUMMY_DAY_SUMMARY: DaySummary = {
   id: 'demo-day-1',
@@ -69,16 +73,15 @@ const DUMMY_DAY_SUMMARY: DaySummary = {
 
 export type RecapScreenContentProps = {
   daySummary: DaySummary;
+  /** True once this recap is already saved (e.g. viewed from someone's inbox) — hides editing/send. */
   readOnly?: boolean;
 };
 
 export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreenContentProps) {
   const router = useRouter();
   const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
-
-  // Excluded stops are dropped from the map too. A stop the sender has hidden from
-  // the recap must not still be plotted for the recipient to see.
-  const mappedPlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   function toggleExcluded(index: number) {
     setExcludedStops((prev) => {
@@ -92,6 +95,34 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
     });
   }
 
+  // Excluded stops are dropped from stats, the map, and what actually gets sent —
+  // a stop the sender has hidden must not still show up for the recipient.
+  const visiblePlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
+  const distanceKm = readOnly ? daySummary.distanceKm : totalDistanceKm(visiblePlaces);
+  const photoCount = visiblePlaces.filter((place) => place.photoUrl).length;
+
+  function handleCancel() {
+    clearDraftRecap(daySummary.id);
+    router.back();
+  }
+
+  async function handleSend() {
+    setSending(true);
+    setSendError(null);
+    try {
+      await saveDaySummary({
+        ...daySummary,
+        places: visiblePlaces,
+        distanceKm: totalDistanceKm(visiblePlaces),
+      });
+      clearDraftRecap(daySummary.id);
+      router.replace('/');
+    } catch (e) {
+      setSendError(e instanceof Error ? e.message : 'Could not send this recap');
+      setSending(false);
+    }
+  }
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -100,17 +131,14 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
           <ThemedText themeColor="textSecondary">{daySummary.summaryText}</ThemedText>
 
           <View style={styles.statsRow}>
-            <Stat label="km" value={daySummary.distanceKm?.toFixed(1) ?? '—'} />
-            <Stat label="stops" value={String(daySummary.places.length)} />
-            <Stat
-              label="photos"
-              value={String(daySummary.places.filter((place) => place.photoUrl).length)}
-            />
+            <Stat label="km" value={distanceKm?.toFixed(1) ?? '—'} />
+            <Stat label="stops" value={String(visiblePlaces.length)} />
+            <Stat label="photos" value={String(photoCount)} />
           </View>
 
-          {mappedPlaces.length > 0 ? (
+          {visiblePlaces.length > 0 ? (
             <View style={styles.mapContainer}>
-              <RouteMap places={mappedPlaces} interactive={false} />
+              <RouteMap places={visiblePlaces} interactive={false} />
             </View>
           ) : null}
 
@@ -129,31 +157,36 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
           </View>
 
           {!readOnly ? (
-            <View style={styles.actionsRow}>
-              <Pressable onPress={() => router.back()} accessibilityRole="button">
-                {({ pressed }) => (
-                  <ThemedView
-                    type="backgroundElement"
-                    style={[styles.secondaryButton, pressed && styles.pressed]}>
-                    <ThemedText type="smallBold">Edit</ThemedText>
-                  </ThemedView>
-                )}
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  // Wiring this up to the real send flow is a separate integration
-                  // step once the backend track's send function is ready.
-                }}
-                accessibilityRole="button"
-                style={styles.primaryButtonWrapper}>
-                {({ pressed }) => (
-                  <ThemedView
-                    type="backgroundSelected"
-                    style={[styles.primaryButton, pressed && styles.pressed]}>
-                    <ThemedText type="smallBold">Send to {daySummary.recipientId}</ThemedText>
-                  </ThemedView>
-                )}
-              </Pressable>
+            <View style={styles.actionsSection}>
+              {sendError ? (
+                <ThemedText themeColor="textSecondary">{sendError}</ThemedText>
+              ) : null}
+              <View style={styles.actionsRow}>
+                <Pressable onPress={handleCancel} accessibilityRole="button" disabled={sending}>
+                  {({ pressed }) => (
+                    <ThemedView
+                      type="backgroundElement"
+                      style={[styles.secondaryButton, pressed && styles.pressed]}>
+                      <ThemedText type="smallBold">Discard</ThemedText>
+                    </ThemedView>
+                  )}
+                </Pressable>
+                <Pressable
+                  onPress={handleSend}
+                  accessibilityRole="button"
+                  disabled={sending}
+                  style={styles.primaryButtonWrapper}>
+                  {({ pressed }) => (
+                    <ThemedView
+                      type="backgroundSelected"
+                      style={[styles.primaryButton, pressed && styles.pressed]}>
+                      <ThemedText type="smallBold">
+                        {sending ? 'Sending…' : `Send to ${daySummary.recipientId}`}
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+                </Pressable>
+              </View>
             </View>
           ) : null}
         </ScrollView>
@@ -173,11 +206,77 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+type RouteStatus = 'loading' | 'error' | 'draft' | 'sent';
+
 export default function RecapRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const daySummary: DaySummary = { ...DUMMY_DAY_SUMMARY, id: id ?? DUMMY_DAY_SUMMARY.id };
+  const isDemoId = !id || id === DUMMY_DAY_SUMMARY.id;
 
-  return <RecapScreenContent daySummary={daySummary} />;
+  const [status, setStatus] = useState<RouteStatus>('loading');
+  const [daySummary, setDaySummary] = useState<DaySummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isDemoId) {
+      setDaySummary(DUMMY_DAY_SUMMARY);
+      setStatus('draft');
+      return;
+    }
+
+    // An unsent draft handed off from building.tsx needs no network round trip.
+    const draft = getDraftRecap(id);
+    if (draft) {
+      setDaySummary(draft);
+      setStatus('draft');
+      return;
+    }
+
+    let cancelled = false;
+    setStatus('loading');
+
+    getDaySummaryById(id)
+      .then((summary) => {
+        if (cancelled) return;
+        if (summary) {
+          setDaySummary(summary);
+          setStatus('sent');
+        } else {
+          setError("Couldn't find that recap.");
+          setStatus('error');
+        }
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : "Couldn't load that recap.");
+        setStatus('error');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isDemoId]);
+
+  if (status === 'error') {
+    return (
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={[styles.safeArea, styles.centered]}>
+          <ThemedText themeColor="textSecondary">{error}</ThemedText>
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
+
+  if (!daySummary) {
+    return (
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={[styles.safeArea, styles.centered]}>
+          <ActivityIndicator />
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
+
+  return <RecapScreenContent daySummary={daySummary} readOnly={status === 'sent'} />;
 }
 
 const styles = StyleSheet.create({
@@ -186,6 +285,10 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     padding: Spacing.four,
@@ -210,10 +313,13 @@ const styles = StyleSheet.create({
   stopsList: {
     gap: Spacing.two,
   },
+  actionsSection: {
+    gap: Spacing.two,
+    marginTop: Spacing.two,
+  },
   actionsRow: {
     flexDirection: 'row',
     gap: Spacing.two,
-    marginTop: Spacing.two,
   },
   secondaryButton: {
     alignItems: 'center',
