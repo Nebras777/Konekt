@@ -26,6 +26,10 @@ function RootNavigator() {
           name="add-person"
           options={{ title: 'Add person', presentation: 'modal' }}
         />
+        <Stack.Screen
+          name="activity"
+          options={{ title: 'Activity', presentation: 'modal' }}
+        />
       </Stack.Protected>
 
       <Stack.Protected guard={!profile}>

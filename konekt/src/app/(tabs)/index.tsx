@@ -10,14 +10,11 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import type { PlaceVisit, Reaction } from '@/constants/types';
+import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useAuth } from '@/hooks/use-auth';
 
-import {
-  getReactionsForOwner,
-  markReactionsSeen,
-} from '../../../services/reactions';
+import { getReactionsForOwner } from '../../../services/reactions';
 
 import { totalDistanceKm } from '../../../services/sendRecap';
 import { setTodayPlaces } from '../../../services/todayDraft';
@@ -28,13 +25,14 @@ export default function TodayScreen() {
   const router = useRouter();
   const { profile } = useAuth();
 
-  // People reacting to recaps you sent — this screen is where you find out.
-  const [activity, setActivity] = useState<Reaction[]>([]);
+  // Unread count for the bell. The list itself lives on the activity screen.
+  const [unseenCount, setUnseenCount] = useState(0);
 
   const loadActivity = useCallback(async () => {
     if (!profile) return;
     try {
-      setActivity(await getReactionsForOwner(profile.id));
+      const reactions = await getReactionsForOwner(profile.id);
+      setUnseenCount(reactions.filter((r) => !r.seen).length);
     } catch {
       // Activity is a nice-to-have; a failure shouldn't blank the screen.
     }
@@ -47,13 +45,7 @@ export default function TodayScreen() {
     }, [loadActivity]),
   );
 
-  const unseen = activity.filter((r) => !r.seen);
 
-  async function markAllRead() {
-    const ids = unseen.map((r) => r.id);
-    setActivity((prev) => prev.map((r) => ({ ...r, seen: true })));
-    await markReactionsSeen(ids);
-  }
   const [media, setMedia] = useState<Record<number, AttachedMedia>>({});
 
   // Whatever the user has actually captured today. Empty until they capture.
@@ -121,11 +113,31 @@ export default function TodayScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Image
-          source={require('@/assets/images/logo-wordmark.png')}
-          style={styles.logo}
-          contentFit="contain"
-        />
+        <View style={styles.headerRow}>
+          <Image
+            source={require('@/assets/images/logo-wordmark.png')}
+            style={styles.logo}
+            contentFit="contain"
+          />
+
+          <Pressable
+            onPress={() => router.push('/activity')}
+            accessibilityRole="button"
+            accessibilityLabel={
+              unseenCount > 0 ? `Activity, ${unseenCount} unread` : 'Activity'
+            }>
+            {({ pressed }) => (
+              <View style={[styles.bellWrapper, pressed && styles.pressed]}>
+                <ThemedText style={styles.bell}>🔔</ThemedText>
+                {unseenCount > 0 ? (
+                  <ThemedView type="backgroundSelected" style={styles.badge}>
+                    <ThemedText type="small">{unseenCount > 9 ? '9+' : unseenCount}</ThemedText>
+                  </ThemedView>
+                ) : null}
+              </View>
+            )}
+          </Pressable>
+        </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
@@ -133,41 +145,6 @@ export default function TodayScreen() {
             <Stat label="stops" value={stats.stops} />
             <Stat label="photos" value={stats.photos} />
           </View>
-
-          {activity.length > 0 ? (
-            <View style={styles.activityBlock}>
-              <View style={styles.activityHeader}>
-                <ThemedText type="smallBold">
-                  Activity{unseen.length > 0 ? ` · ${unseen.length} new` : ''}
-                </ThemedText>
-                {unseen.length > 0 ? (
-                  <Pressable onPress={markAllRead} accessibilityRole="button">
-                    {({ pressed }) => (
-                      <ThemedText
-                        type="small"
-                        themeColor="textSecondary"
-                        style={pressed ? styles.pressed : undefined}>
-                        Mark all read
-                      </ThemedText>
-                    )}
-                  </Pressable>
-                ) : null}
-              </View>
-
-              {activity.slice(0, 5).map((item) => (
-                <ThemedView
-                  key={item.id}
-                  type={item.seen ? 'backgroundElement' : 'backgroundSelected'}
-                  style={styles.activityRow}>
-                  <ThemedText type="small">
-                    {item.seen ? '' : '• '}
-                    <ThemedText type="smallBold">{item.reactorName}</ThemedText> reacted “
-                    {item.label}” to your recap
-                  </ThemedText>
-                </ThemedView>
-              ))}
-            </View>
-          ) : null}
 
           {isEmpty ? (
             <ThemedText type="small" themeColor="textSecondary">
@@ -276,18 +253,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  activityBlock: {
-    gap: Spacing.two,
-  },
-  activityHeader: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  activityRow: {
-    borderRadius: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+  bellWrapper: {
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+  },
+  bell: {
+    fontSize: 22,
+  },
+  badge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
   captureButton: {
     alignItems: 'center',

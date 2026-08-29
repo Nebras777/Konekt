@@ -135,7 +135,11 @@ export default function RecapsScreen() {
     [profile, myReactions, load],
   );
 
-  const visible = (summaries ?? []).filter((s) => !showSavedOnly || savedIds.has(s.id));
+  // Count saves whose recap still exists, not raw bookmarks: a save points at a
+  // recap by id, so one whose recap was deleted can never be shown and counting
+  // it promises a row that will never appear.
+  const savedVisible = (summaries ?? []).filter((s) => savedIds.has(s.id));
+  const visible = showSavedOnly ? savedVisible : (summaries ?? []);
 
   return (
     <ThemedView style={styles.container}>
@@ -146,7 +150,7 @@ export default function RecapsScreen() {
           <View style={styles.filterRow}>
             {([false, true] as const).map((savedOnly) => {
               const active = showSavedOnly === savedOnly;
-              const label = savedOnly ? `Saved (${savedIds.size})` : 'All';
+              const label = savedOnly ? `Saved (${savedVisible.length})` : 'All';
               return (
                 <Pressable
                   key={label}
