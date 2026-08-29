@@ -101,7 +101,7 @@ function toSafeJson(value: unknown): string {
 }
 
 function buildHtml(
-  places: PlaceVisit[],
+  places: PlottablePlace[],
   strokeColor: string,
   strokeWidth: number,
   tileUrl: string,
@@ -220,8 +220,21 @@ function buildHtml(
   ].join('\n');
 }
 
+/** A stop that actually has a position, so it can be drawn. */
+type PlottablePlace = PlaceVisit & { lat: number; lng: number };
+
+/**
+ * Whether a stop can be drawn. Screens should gate the map on this rather than
+ * on places.length: a recap whose location was withheld still has stops (with
+ * their photos), just no coordinates, and rendering a map for those shows an
+ * empty basemap with no pins.
+ */
+export function hasPosition(place: PlaceVisit): place is PlottablePlace {
+  return typeof place.lat === 'number' && typeof place.lng === 'number';
+}
+
 export function RouteMap({
-  places,
+  places: allPlaces,
   strokeColor = '#7A5AF8',
   strokeWidth = 4,
   style,
@@ -230,6 +243,9 @@ export function RouteMap({
   tileAttribution = DEFAULT_ATTRIBUTION,
   interactive = true,
 }: RouteMapProps) {
+  // Stops whose location wasn't shared have no coordinates and can't be drawn.
+  const places = useMemo(() => allPlaces.filter(hasPosition), [allPlaces]);
+
   const html = useMemo(
     () => buildHtml(places, strokeColor, strokeWidth, tileUrl, tileAttribution, interactive),
     [places, strokeColor, strokeWidth, tileUrl, tileAttribution, interactive],

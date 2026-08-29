@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
-import RouteMap from '@/components/RouteMap';
+import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
@@ -219,7 +219,7 @@ function InboxRecap({
         </ThemedText>
       ) : null}
 
-      {summary.places.length > 0 ? (
+      {summary.places.some(hasPosition) ? (
         <View style={styles.mapContainer}>
           <RouteMap places={summary.places} interactive={false} />
         </View>

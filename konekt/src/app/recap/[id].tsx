@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
-import RouteMap from '@/components/RouteMap';
+import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/hooks/use-auth';
@@ -146,7 +146,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
             <Stat label="photos" value={String(photoCount)} />
           </View>
 
-          {visiblePlaces.length > 0 ? (
+          {visiblePlaces.some(hasPosition) ? (
             <View style={styles.mapContainer}>
               <RouteMap places={visiblePlaces} interactive={false} />
             </View>

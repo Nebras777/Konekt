@@ -1,8 +1,14 @@
 export type PlaceVisit = {
   name: string;
   type: PlaceType;
-  lat: number;
-  lng: number;
+  /**
+   * Coordinates are optional because a stop can be shared without them: when
+   * the sender's privacy settings withhold location, the stop still carries its
+   * name, time and photos, but no position. Anything that plots a stop must
+   * check for these rather than assume them.
+   */
+  lat?: number;
+  lng?: number;
   time: string;
   subtitle?: string;
   photoUrl?: string;

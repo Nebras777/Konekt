@@ -18,7 +18,10 @@ function todayISO(): string {
 }
 
 // Straight-line distance between two coordinates, in km (haversine formula).
-function haversineKm(a: PlaceVisit, b: PlaceVisit): number {
+/** A stop with a known position — the only kind we can measure between. */
+type LocatedPlace = PlaceVisit & { lat: number; lng: number };
+
+function haversineKm(a: LocatedPlace, b: LocatedPlace): number {
   const R = 6371;
   const rad = (d: number) => (d * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat);
@@ -32,9 +35,13 @@ function haversineKm(a: PlaceVisit, b: PlaceVisit): number {
 // Total distance across the day, rounded to one decimal. Exported so the
 // recap screen can recompute it after the user excludes stops, pre-send.
 export function totalDistanceKm(places: PlaceVisit[]): number {
+  // Stops whose location wasn't shared have no coordinates to measure between.
+  const located = places.filter(
+    (p): p is LocatedPlace => typeof p.lat === 'number' && typeof p.lng === 'number',
+  );
   let km = 0;
-  for (let i = 1; i < places.length; i++) {
-    km += haversineKm(places[i - 1], places[i]);
+  for (let i = 1; i < located.length; i++) {
+    km += haversineKm(located[i - 1], located[i]);
   }
   return Math.round(km * 10) / 10;
 }
@@ -115,12 +122,20 @@ export async function sendRecapToConnections(
             ? privacy.shareLocationWithFriends
             : true;
 
-      // Withheld location is omitted from the document, not hidden in the UI.
-      // Writing the stops and asking the recipient's app not to draw them would
+      // Withheld coordinates are omitted from the document, not hidden in the
+      // UI: writing them and asking the recipient's app not to draw them would
       // still put the sender's movements in a database that recipient can read.
+      //
+      // Only the position goes. The stop keeps its name, time, note and photos,
+      // so the recipient still sees the day — just not where it happened.
       const payload: DaySummary = shareLocation
         ? summary
-        : { ...summary, places: [], distanceKm: undefined, locationHidden: true };
+        : {
+            ...summary,
+            places: summary.places.map(({ lat, lng, ...rest }) => rest),
+            distanceKm: undefined,
+            locationHidden: true,
+          };
 
       return saveDaySummary({
         ...payload,
