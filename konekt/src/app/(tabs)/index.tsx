@@ -10,9 +10,11 @@ export default function TodayScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Today</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          Your day so far will show up here.
-        </ThemedText>
+        <ThemedView type="backgroundElement" style={styles.card}>
+          <ThemedText type="default" themeColor="textSecondary">
+            Your day so far will show up here.
+          </ThemedText>
+        </ThemedView>
       </SafeAreaView>
     </ThemedView>
   );
@@ -24,10 +26,13 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.two,
+    gap: Spacing.four,
     paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.five,
     paddingBottom: BottomTabInset + Spacing.three,
+  },
+  card: {
+    borderRadius: Spacing.four,
+    padding: Spacing.four,
   },
 });

@@ -16,9 +16,16 @@ const CONTACTS: Contact[] = [
   { name: 'Sam', relationship: 'Friend', status: 'Invite pending' },
 ];
 
+function initials(name: string) {
+  return name.slice(0, 2).toUpperCase();
+}
+
 function ContactRow({ name, relationship, status }: Contact) {
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
+      <ThemedView type="backgroundSelected" style={styles.avatar}>
+        <ThemedText type="smallBold">{initials(name)}</ThemedText>
+      </ThemedView>
       <View style={styles.rowText}>
         <ThemedText type="smallBold">{name}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
@@ -54,7 +61,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.six,
+    paddingTop: Spacing.five,
     paddingBottom: BottomTabInset + Spacing.three,
     gap: Spacing.four,
   },
@@ -63,13 +70,21 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Spacing.four,
+    gap: Spacing.three,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowText: {
+    flex: 1,
     gap: Spacing.half,
   },
 });

@@ -26,10 +26,23 @@ export default function PrivacyScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Privacy</ThemedText>
-        <View style={styles.list}>
+        <View style={styles.header}>
+          <ThemedText type="title">Privacy</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Your location stays on this phone until you send a recap.
+          </ThemedText>
+        </View>
+        <ThemedView type="backgroundElement" style={styles.card}>
           {TOGGLES.map((label, index) => (
-            <ThemedView key={label} type="backgroundElement" style={styles.row}>
+            <View
+              key={label}
+              style={[
+                styles.row,
+                index !== TOGGLES.length - 1 && {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: theme.backgroundSelected,
+                },
+              ]}>
               <ThemedText type="default" style={styles.rowLabel}>
                 {label}
               </ThemedText>
@@ -38,9 +51,9 @@ export default function PrivacyScreen() {
                 onValueChange={() => toggle(index)}
                 trackColor={{ true: theme.primary }}
               />
-            </ThemedView>
+            </View>
           ))}
-        </View>
+        </ThemedView>
       </SafeAreaView>
     </ThemedView>
   );
@@ -53,20 +66,22 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.six,
+    paddingTop: Spacing.five,
     paddingBottom: BottomTabInset + Spacing.three,
     gap: Spacing.four,
   },
-  list: {
-    gap: Spacing.three,
+  header: {
+    gap: Spacing.one,
+  },
+  card: {
+    borderRadius: Spacing.four,
+    paddingHorizontal: Spacing.three,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
     gap: Spacing.three,
   },
   rowLabel: {
