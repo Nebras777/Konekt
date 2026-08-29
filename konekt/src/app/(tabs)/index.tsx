@@ -10,7 +10,7 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Accents, BottomTabInset, Danger, Radii, Spacing, Surface } from '@/constants/theme';
+import { Accents, Danger, Radii, Spacing, Surface } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useAuth } from '@/hooks/use-auth';
@@ -299,7 +299,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingBottom: BottomTabInset,
+    // The native tab bar occupies its own layout space, so reserving a full
+    // BottomTabInset on top of it left the buttons floating high above it.
+    paddingBottom: Spacing.four,
   },
   logo: {
     width: 140,
@@ -333,10 +335,11 @@ const styles = StyleSheet.create({
   },
   recapButton: {
     marginHorizontal: Spacing.four,
-    marginTop: Spacing.two,
+    // Clear of the list above so the cards stay readable.
+    marginTop: Spacing.five,
     alignItems: 'center',
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.four,
+    borderRadius: Radii.pill,
   },
   pressed: {
     opacity: 0.7,
