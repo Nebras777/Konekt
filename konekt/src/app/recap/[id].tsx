@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -16,7 +17,7 @@ import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/hooks/use-auth';
-import { Spacing } from '@/constants/theme';
+import { PrimaryText, Radii, Spacing } from '@/constants/theme';
 import type { ConnectionGroup, DaySummary } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -261,13 +262,15 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
                   disabled={sending}
                   style={styles.primaryButtonWrapper}>
                   {({ pressed }) => (
-                    <ThemedView
-                      type="backgroundSelected"
+                    <LinearGradient
+                      colors={['#00E5FF', '#3DFF9A']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
                       style={[styles.primaryButton, pressed && styles.pressed]}>
-                      <ThemedText type="smallBold">
+                      <ThemedText type="smallBold" style={{ color: PrimaryText }}>
                         {sending ? 'Sending…' : sendLabel}
                       </ThemedText>
-                    </ThemedView>
+                    </LinearGradient>
                   )}
                 </Pressable>
               </View>
@@ -444,7 +447,7 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: 'center',
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.four,
+    borderRadius: Radii.pill,
   },
   pressed: {
     opacity: 0.7,

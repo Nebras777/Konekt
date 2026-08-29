@@ -60,8 +60,7 @@ export default function ActivityScreen() {
             {({ pressed }) => (
               <ThemedText
                 type="smallBold"
-                themeColor="textSecondary"
-                style={pressed ? styles.pressed : undefined}>
+                style={[{ color: Accents.cyan }, pressed ? styles.pressed : undefined]}>
                 Mark all read
               </ThemedText>
             )}

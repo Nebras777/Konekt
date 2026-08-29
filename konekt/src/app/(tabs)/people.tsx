@@ -3,9 +3,17 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { accentFor, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
+import {
+  accentFor,
+  Accents,
+  BottomTabInset,
+  Radii,
+  Spacing,
+  Surface,
+} from '@/constants/theme';
 import type {
   Connection,
   ConnectionGroup,
@@ -226,7 +234,7 @@ export default function PeopleScreen() {
   return (
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">People</ThemedText>
+        <ScreenTitle accent={Accents.cyan}>People</ScreenTitle>
 
         {pendingIncoming.length > 0 ? (
           <View style={styles.list}>

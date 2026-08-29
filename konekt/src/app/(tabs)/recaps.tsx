@@ -5,9 +5,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
+import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { AccentList, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
+import {
+  AccentList,
+  Accents,
+  BottomTabInset,
+  Radii,
+  Spacing,
+  Surface,
+} from '@/constants/theme';
 import type { DaySummary } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -144,7 +152,7 @@ export default function RecapsScreen() {
   return (
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Recaps</ThemedText>
+        <ScreenTitle accent={Accents.magenta}>Recaps</ScreenTitle>
 
         {summaries && summaries.length > 0 ? (
           <View style={styles.filterRow}>
@@ -159,7 +167,11 @@ export default function RecapsScreen() {
                   {({ pressed }) => (
                     <ThemedView
                       type={active ? 'backgroundSelected' : 'backgroundElement'}
-                      style={[styles.filterChip, pressed && styles.pressed]}>
+                      style={[
+                        styles.filterChip,
+                        active && { borderColor: Accents.magenta, borderWidth: 2 },
+                        pressed && styles.pressed,
+                      ]}>
                       <ThemedText type="smallBold">{label}</ThemedText>
                     </ThemedView>
                   )}

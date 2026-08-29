@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Accents, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
@@ -83,7 +84,7 @@ export default function PrivacyScreen() {
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <ThemedText type="title">Privacy</ThemedText>
+          <ScreenTitle accent={Accents.lavender}>Privacy</ScreenTitle>
           <ThemedText type="small" themeColor="textSecondary">
             Your location stays on this phone until you send a recap.
           </ThemedText>

@@ -6,9 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
+import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { accentFor, BottomTabInset, Spacing } from '@/constants/theme';
+import { accentFor, Accents, BottomTabInset, Spacing } from '@/constants/theme';
 import type { DaySummary } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -94,7 +95,7 @@ export default function MemoryLaneScreen() {
   return (
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Memory Lane</ThemedText>
+        <ScreenTitle accent={Accents.lime}>Memory Lane</ScreenTitle>
 
         {days === null ? (
           <View style={styles.centre}>
