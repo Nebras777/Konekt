@@ -63,8 +63,13 @@ export type Connection = {
   phone?: string;
   relationship: ConnectionRelationship;
   status: ConnectionStatus;
-  /** Profile that created this connection. Connections are private to their owner. */
+  /** Profile that created this connection — the person who sent the invite. */
   ownerId?: string;
+  /**
+   * The inviter's display name, stored at invite time. The person receiving an
+   * invite needs to see who it's from, and `name` holds the invitee's name.
+   */
+  ownerName?: string;
   /**
    * The invited person's profile id, when they're a Konekt user. This is what
    * makes an invite routable: recaps are addressed to this id.

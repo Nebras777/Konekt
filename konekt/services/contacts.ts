@@ -43,18 +43,37 @@ export async function getContacts(ownerId: string): Promise<Connection[]> {
  */
 export async function inviteProfile(params: {
   ownerId: string;
+  ownerName: string;
   profileId: string;
   name: string;
   relationship?: ConnectionRelationship;
 }): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTION), {
     ownerId: params.ownerId,
+    ownerName: params.ownerName,
     profileId: params.profileId,
     name: params.name,
     relationship: params.relationship ?? 'other',
     status: 'pending' as ConnectionStatus,
   });
   return ref.id;
+}
+
+/**
+ * Invites addressed TO this profile — the receiving end of the relationship.
+ *
+ * getContacts() reads by ownerId and so only ever returns invites you sent;
+ * without this query the invited person could never see, let alone accept, an
+ * invite. Accepting is what authorises the sender to deliver recaps, so it has
+ * to happen on the invitee's own account.
+ */
+export async function getIncomingInvites(profileId: string): Promise<Connection[]> {
+  const snap = await getDocs(
+    query(collection(db, COLLECTION), where('profileId', '==', profileId)),
+  );
+  return snap.docs
+    .map((d) => ({ ...(d.data() as Omit<Connection, 'id'>), id: d.id }))
+    .sort((a, b) => (a.ownerName ?? '').localeCompare(b.ownerName ?? ''));
 }
 
 /**
