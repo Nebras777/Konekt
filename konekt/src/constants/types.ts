@@ -59,9 +59,17 @@ export type ConnectionRelationship =
 export type Connection = {
   id: string;
   name: string;
-  phone: string;
+  /** Optional: invites sent to a Konekt profile don't need a phone number. */
+  phone?: string;
   relationship: ConnectionRelationship;
   status: ConnectionStatus;
+  /** Profile that created this connection. Connections are private to their owner. */
+  ownerId?: string;
+  /**
+   * The invited person's profile id, when they're a Konekt user. This is what
+   * makes an invite routable: recaps are addressed to this id.
+   */
+  profileId?: string;
 };
 
 // The app user's own identity, created at sign-up.

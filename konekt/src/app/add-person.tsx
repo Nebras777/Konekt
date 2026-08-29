@@ -9,6 +9,8 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { ConnectionRelationship } from '@/constants/types';
 
+import { useAuth } from '@/hooks/use-auth';
+
 import { addContact } from '../../services/contacts';
 
 const RELATIONSHIPS: { value: ConnectionRelationship; label: string }[] = [
@@ -23,6 +25,7 @@ const RELATIONSHIPS: { value: ConnectionRelationship; label: string }[] = [
 export default function AddPersonScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { profile } = useAuth();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -30,7 +33,8 @@ export default function AddPersonScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const canSubmit = name.trim().length > 0 && phone.trim().length >= 6 && !submitting;
+  const canSubmit =
+    name.trim().length > 0 && phone.trim().length >= 6 && !submitting && !!profile;
 
   async function handleSubmit() {
     if (!canSubmit) return;
@@ -38,7 +42,10 @@ export default function AddPersonScreen() {
     setSubmitError(null);
     try {
       // New connections start as `pending` until the invite is accepted.
+      // ownerId matters: contacts are scoped to the profile that created them,
+      // so one written without it would be invisible everywhere.
       await addContact({
+        ownerId: profile!.id,
         name: name.trim(),
         phone: phone.trim(),
         relationship,

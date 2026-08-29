@@ -1,6 +1,10 @@
-import { addDoc, collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { db } from './firebaseConfig';
-import type { Connection, ConnectionStatus } from '../src/constants/types';
+import type {
+  Connection,
+  ConnectionRelationship,
+  ConnectionStatus,
+} from '../src/constants/types';
 
 const COLLECTION = 'contacts';
 
@@ -19,13 +23,38 @@ export async function addContact(
 }
 
 /**
- * Get every saved contact, sorted alphabetically by name.
+ * Get the contacts belonging to one profile, sorted alphabetically by name.
+ *
+ * Scoped by ownerId: without it every device saw every contact in the database.
+ * Contacts written before ownerId existed have no owner and are excluded.
  */
-export async function getContacts(): Promise<Connection[]> {
-  const snap = await getDocs(collection(db, COLLECTION));
+export async function getContacts(ownerId: string): Promise<Connection[]> {
+  const snap = await getDocs(
+    query(collection(db, COLLECTION), where('ownerId', '==', ownerId)),
+  );
   return snap.docs
     .map((d) => ({ ...(d.data() as Omit<Connection, 'id'>), id: d.id }))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Invite an existing Konekt profile. Unlike a typed-in contact this carries the
+ * invitee's profileId, which is what lets recaps be addressed to them.
+ */
+export async function inviteProfile(params: {
+  ownerId: string;
+  profileId: string;
+  name: string;
+  relationship?: ConnectionRelationship;
+}): Promise<string> {
+  const ref = await addDoc(collection(db, COLLECTION), {
+    ownerId: params.ownerId,
+    profileId: params.profileId,
+    name: params.name,
+    relationship: params.relationship ?? 'other',
+    status: 'pending' as ConnectionStatus,
+  });
+  return ref.id;
 }
 
 /**
