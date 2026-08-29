@@ -18,7 +18,14 @@ const COLLECTION = 'day_summaries';
  * Returns the summary's id.
  */
 export async function saveDaySummary(summary: DaySummary): Promise<string> {
-  await setDoc(doc(db, COLLECTION, summary.id), summary);
+  // Firestore rejects any field explicitly set to `undefined` (e.g. an
+  // optional highlightNote/voiceNoteUrl that wasn't filled in) — drop those
+  // keys entirely rather than writing them.
+  const cleaned = Object.fromEntries(
+    Object.entries(summary).filter(([, value]) => value !== undefined),
+  ) as DaySummary;
+
+  await setDoc(doc(db, COLLECTION, summary.id), cleaned);
   return summary.id;
 }
 
