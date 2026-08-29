@@ -9,13 +9,12 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { mockRoute } from '@/constants/mockRoute';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
+import { useDayRoute } from '@/hooks/use-day-route';
 
+import { totalDistanceKm } from '../../../services/sendRecap';
 import { setTodayPlaces } from '../../../services/todayDraft';
-
-const TODAY_DISTANCE_KM = 4.6;
 
 type AttachedMedia = { uri: string; type: 'photo' | 'video' };
 
@@ -23,12 +22,26 @@ export default function TodayScreen() {
   const router = useRouter();
   const [media, setMedia] = useState<Record<number, AttachedMedia>>({});
 
+  // Whatever the user has actually captured today. Empty until they capture.
+  const { route, isEmpty, endDay, capture, isCapturing, error } = useDayRoute();
+
   const photoCount =
-    mockRoute.filter((place) => place.photoUrl).length + Object.keys(media).length;
+    route.filter((place) => place.photoUrl).length + Object.keys(media).length;
+
+  function confirmEndDay() {
+    Alert.alert(
+      'End your day?',
+      `This clears today's ${route.length} stop${route.length === 1 ? '' : 's'} from this device. Recaps you've already sent are kept.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'End day', style: 'destructive', onPress: endDay },
+      ],
+    );
+  }
 
   const stats = {
-    km: TODAY_DISTANCE_KM.toFixed(1),
-    stops: String(mockRoute.length),
+    km: totalDistanceKm(route).toFixed(1),
+    stops: String(route.length),
     photos: String(photoCount),
   };
 
@@ -62,7 +75,7 @@ export default function TodayScreen() {
   }
 
   function handleMakeRecap() {
-    const placesWithMedia: PlaceVisit[] = mockRoute.map((place, index) => {
+    const placesWithMedia: PlaceVisit[] = route.map((place, index) => {
       const attached = media[index];
       if (!attached) return place;
       return { ...place, mediaUri: attached.uri, mediaType: attached.type };
@@ -87,8 +100,32 @@ export default function TodayScreen() {
             <Stat label="photos" value={stats.photos} />
           </View>
 
+          {isEmpty ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              No stops yet. Capture a location to start your day.
+            </ThemedText>
+          ) : null}
+
+          {error ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {error}
+            </ThemedText>
+          ) : null}
+
+          <Pressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
+            {({ pressed }) => (
+              <ThemedView
+                type="backgroundSelected"
+                style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
+                <ThemedText type="smallBold">
+                  {isCapturing ? 'Finding you…' : 'Capture this place'}
+                </ThemedText>
+              </ThemedView>
+            )}
+          </Pressable>
+
           <View style={styles.stopsList}>
-            {mockRoute.map((place, index) => {
+            {route.map((place, index) => {
               const attached = media[index];
               return (
                 <DayCard
@@ -136,6 +173,20 @@ export default function TodayScreen() {
             </ThemedView>
           )}
         </Pressable>
+
+        {!isEmpty ? (
+          <Pressable onPress={confirmEndDay} accessibilityRole="button">
+            {({ pressed }) => (
+              <ThemedView
+                type="backgroundElement"
+                style={[styles.endDayButton, pressed && styles.pressed]}>
+                <ThemedText type="smallBold" themeColor="textSecondary">
+                  End day
+                </ThemedText>
+              </ThemedView>
+            )}
+          </Pressable>
+        ) : null}
       </SafeAreaView>
     </ThemedView>
   );
@@ -155,6 +206,17 @@ function Stat({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  captureButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.four,
+  },
+  endDayButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.four,
+    marginTop: Spacing.two,
   },
   safeArea: {
     flex: 1,

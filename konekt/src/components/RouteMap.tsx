@@ -53,6 +53,15 @@ const FALLBACK_CENTER = { lat: -33.8893, lng: 151.1915, zoom: 14 };
 const DEFAULT_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const DEFAULT_ATTRIBUTION = '&copy; OpenStreetMap contributors';
 
+/** Zoom used when there is only one stop to show — street level. */
+const SINGLE_STOP_ZOOM = 17;
+
+/** Gap in pixels between the outermost pins and the edge of the map. */
+const FIT_PADDING_PX = 24;
+
+/** Ceiling for the auto-fit, so two stops a few metres apart don't slam to max zoom. */
+const MAX_FIT_ZOOM = 17;
+
 const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
 const LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
 
@@ -181,10 +190,26 @@ function buildHtml(
     '          (s.subtitle ? "<br/>" + s.subtitle : ""))',
     '        .on("click", function () { post({ type: "select", index: s.index }); });',
     '    });',
-    '    if (stops.length === 1) {',
-    '      map.setView(latlngs[0], 16);',
-    '    } else {',
-    '      map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });',
+    '    var frame = function () {',
+    '      if (stops.length === 1) {',
+    '        map.setView(latlngs[0], ' + SINGLE_STOP_ZOOM + ');',
+    '      } else {',
+    '        map.fitBounds(L.latLngBounds(latlngs), {',
+    '          padding: [' + FIT_PADDING_PX + ', ' + FIT_PADDING_PX + '],',
+    '          maxZoom: ' + MAX_FIT_ZOOM,
+    '        });',
+    '      }',
+    '    };',
+    '    frame();',
+    // Inside a FlatList or ScrollView the WebView is often laid out AFTER the
+    // map initialises, so the first fit is computed against the wrong height
+    // and the route ends up off-frame. Re-measure and re-fit once layout settles.
+    '    var settle = function () { map.invalidateSize(); frame(); };',
+    '    setTimeout(settle, 150);',
+    '    setTimeout(settle, 600);',
+    '    window.addEventListener("resize", settle);',
+    '    if (typeof ResizeObserver !== "undefined") {',
+    '      new ResizeObserver(settle).observe(document.getElementById("map"));',
     '    }',
     '    post({ type: "ready", stops: stops.length });',
     '  } catch (err) {',
