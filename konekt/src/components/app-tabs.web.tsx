@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import {
   Tabs,
   TabList,
@@ -12,7 +11,7 @@ import { Pressable, View, StyleSheet } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function AppTabs() {
   return (
@@ -56,12 +55,6 @@ export function CustomTabList(props: TabListProps) {
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <Image
-          source={require('@/assets/images/logo-wordmark.png')}
-          style={styles.brandImage}
-          contentFit="contain"
-        />
-
         {props.children}
       </ThemedView>
     </View>
@@ -83,14 +76,8 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.five,
     flexDirection: 'row',
     alignItems: 'center',
-    flexGrow: 1,
+    justifyContent: 'center',
     gap: Spacing.two,
-    maxWidth: MaxContentWidth,
-  },
-  brandImage: {
-    height: 22,
-    width: 22 * (1761 / 681),
-    marginRight: 'auto',
   },
   pressed: {
     opacity: 0.7,

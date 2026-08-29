@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,7 +10,11 @@ export default function TodayScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Today</ThemedText>
+        <Image
+          source={require('@/assets/images/logo-wordmark.png')}
+          style={styles.logo}
+          contentFit="contain"
+        />
         <ThemedView type="backgroundElement" style={styles.card}>
           <ThemedText type="default" themeColor="textSecondary">
             Your day so far will show up here.
@@ -30,6 +35,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.five,
     paddingBottom: BottomTabInset + Spacing.three,
+  },
+  logo: {
+    height: 38,
+    width: 38 * (1761 / 681),
+    alignSelf: 'flex-start',
   },
   card: {
     borderRadius: Spacing.four,
