@@ -71,6 +71,12 @@ export type RouteMapProps = {
   tileUrl?: string;
   /** Attribution shown on the map. Change this whenever tileUrl changes. */
   tileAttribution?: string;
+  /**
+   * Whether the map pans and zooms. Set false when the map sits inside a
+   * ScrollView, so vertical drags scroll the page instead of being swallowed
+   * by the map. Markers stay tappable either way.
+   */
+  interactive?: boolean;
 };
 
 type BridgeMessage = {
@@ -91,6 +97,7 @@ function buildHtml(
   strokeWidth: number,
   tileUrl: string,
   tileAttribution: string,
+  interactive: boolean,
 ): string {
   const stops = toSafeJson(
     places.map((place, index) => ({
@@ -103,6 +110,18 @@ function buildHtml(
       index,
     })),
   );
+
+  const mapOptions = interactive
+    ? { zoomControl: false }
+    : {
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+      };
 
   return [
     '<!DOCTYPE html>',
@@ -130,7 +149,7 @@ function buildHtml(
     '    return;',
     '  }',
     '  try {',
-    '    var map = L.map("map", { zoomControl: false });',
+    '    var map = L.map("map", ' + toSafeJson(mapOptions) + ');',
     '    L.tileLayer(' + toSafeJson(tileUrl) + ', {',
     '      maxZoom: 19,',
     '      attribution: ' + toSafeJson(tileAttribution),
@@ -184,10 +203,11 @@ export function RouteMap({
   onSelectPlace,
   tileUrl = DEFAULT_TILE_URL,
   tileAttribution = DEFAULT_ATTRIBUTION,
+  interactive = true,
 }: RouteMapProps) {
   const html = useMemo(
-    () => buildHtml(places, strokeColor, strokeWidth, tileUrl, tileAttribution),
-    [places, strokeColor, strokeWidth, tileUrl, tileAttribution],
+    () => buildHtml(places, strokeColor, strokeWidth, tileUrl, tileAttribution, interactive),
+    [places, strokeColor, strokeWidth, tileUrl, tileAttribution, interactive],
   );
 
   const handleMessage = useCallback(

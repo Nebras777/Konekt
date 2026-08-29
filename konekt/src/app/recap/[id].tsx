@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
+import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -75,6 +76,10 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   const router = useRouter();
   const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
 
+  // Excluded stops are dropped from the map too. A stop the sender has hidden from
+  // the recap must not still be plotted for the recipient to see.
+  const mappedPlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
+
   function toggleExcluded(index: number) {
     setExcludedStops((prev) => {
       const next = new Set(prev);
@@ -102,6 +107,12 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
               value={String(daySummary.places.filter((place) => place.photoUrl).length)}
             />
           </View>
+
+          {mappedPlaces.length > 0 ? (
+            <View style={styles.mapContainer}>
+              <RouteMap places={mappedPlaces} interactive={false} />
+            </View>
+          ) : null}
 
           <View style={styles.stopsList}>
             {daySummary.places.map((place, index) => (
@@ -190,6 +201,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
     gap: Spacing.half,
+  },
+  mapContainer: {
+    height: 220,
+    borderRadius: Spacing.three,
+    overflow: 'hidden',
   },
   stopsList: {
     gap: Spacing.two,

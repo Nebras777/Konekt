@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
+import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
@@ -87,6 +88,12 @@ function InboxRecap({ summary }: { summary: DaySummary }) {
         <Stat label="stops" value={String(summary.places.length)} />
         <Stat label="photos" value={String(photoCount)} />
       </View>
+
+      {summary.places.length > 0 ? (
+        <View style={styles.mapContainer}>
+          <RouteMap places={summary.places} interactive={false} />
+        </View>
+      ) : null}
 
       <View style={styles.stopsList}>
         {summary.places.map((place, index) => (
@@ -174,6 +181,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
     gap: Spacing.half,
+  },
+  mapContainer: {
+    height: 200,
+    borderRadius: Spacing.three,
+    overflow: 'hidden',
   },
   stopsList: {
     gap: Spacing.two,
