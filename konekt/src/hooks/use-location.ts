@@ -3,6 +3,7 @@ import * as Location from 'expo-location';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { PlaceType, PlaceVisit } from '@/constants/types';
+import { useAuth } from '@/hooks/use-auth';
 
 /**
  * useLocation — reads the device's current position as a PlaceVisit.
@@ -27,8 +28,18 @@ import type { PlaceType, PlaceVisit } from '@/constants/types';
  * Fast Refresh would be worse than not having the feature.
  */
 
-/** AsyncStorage key holding the captured points. */
-const STORAGE_KEY = 'konekt.capturedPoints.v1';
+/**
+ * AsyncStorage key holding the captured points, scoped per profile so two
+ * accounts signed in on the same device don't share a day.
+ */
+const STORAGE_PREFIX = 'konekt.capturedPoints.v2';
+
+/** Which profile the in-memory store currently belongs to. */
+let storeOwnerId: string | null = null;
+
+function storageKey(profileId: string): string {
+  return `${STORAGE_PREFIX}.${profileId}`;
+}
 
 /**
  * Module-level store. Component state is discarded when a screen unmounts, so
@@ -57,19 +68,33 @@ function getSnapshot(): PlaceVisit[] {
 function setCapturedPoints(next: PlaceVisit[]) {
   capturedPoints = next;
   emit();
-  void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {
+  if (!storeOwnerId) {
+    return;
+  }
+  void AsyncStorage.setItem(storageKey(storeOwnerId), JSON.stringify(next)).catch(() => {
     // A failed write costs persistence, not the in-memory points. Don't throw
     // in the middle of a capture the user is watching.
   });
 }
 
-/** Runs once per app launch; later mounts reuse whatever is already in memory. */
+/** One hydration per profile; switching profiles reloads from that profile's key. */
 let hydration: Promise<void> | null = null;
 
-function hydrate(): Promise<void> {
-  hydration ??= (async () => {
+function hydrate(profileId: string): Promise<void> {
+  if (storeOwnerId === profileId && hydration) {
+    return hydration;
+  }
+
+  // Different profile than the one in memory: drop their stops before loading.
+  if (storeOwnerId !== profileId) {
+    storeOwnerId = profileId;
+    capturedPoints = [];
+    emit();
+  }
+
+  hydration = (async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const raw = await AsyncStorage.getItem(storageKey(profileId));
       if (!raw) {
         return;
       }
@@ -77,8 +102,8 @@ function hydrate(): Promise<void> {
       if (!Array.isArray(parsed)) {
         return;
       }
-      // Anything already captured this session wins over the stored copy.
-      if (capturedPoints.length === 0) {
+      // Guard against a slow read landing after the user switched again.
+      if (storeOwnerId === profileId && capturedPoints.length === 0) {
         capturedPoints = parsed as PlaceVisit[];
         emit();
       }
@@ -162,6 +187,7 @@ function nameFromAddress(address: Location.LocationGeocodedAddress | undefined):
 }
 
 export function useLocation(options: UseLocationOptions = {}): UseLocation {
+  const { profile } = useAuth();
   const {
     type = 'other',
     accuracy = Location.Accuracy.Balanced,
@@ -183,14 +209,17 @@ export function useLocation(options: UseLocationOptions = {}): UseLocation {
     };
   }, []);
 
-  // Pull previously captured points back in on first mount after a launch.
+  // Pull this profile's previously captured points back in.
   useEffect(() => {
-    void hydrate().then(() => {
+    if (!profile) {
+      return;
+    }
+    void hydrate(profile.id).then(() => {
       if (mounted.current && capturedPoints.length > 0) {
         setStatus((prev) => (prev === 'idle' ? 'ready' : prev));
       }
     });
-  }, []);
+  }, [profile]);
 
   const refresh = useCallback(async (): Promise<PlaceVisit | null> => {
     setError(null);

@@ -51,8 +51,11 @@ export async function buildDayRecap(
   places: PlaceVisit[],
   options: BuildRecapOptions = {},
 ): Promise<DaySummary> {
-  const profile = options.userId ? null : await getCurrentProfile();
-  const userId = options.userId ?? profile?.name ?? DEMO_USERS.sender;
+  // Address the recap by profile id, not by name: names are freely typed, can
+  // collide, and change. senderName carries the human-readable part.
+  const profile = await getCurrentProfile();
+  const userId = options.userId ?? profile?.id ?? DEMO_USERS.sender;
+  const senderName = profile?.name ?? DEMO_USERS.sender;
   const recipientId = options.recipientId ?? DEMO_USERS.recipient;
   const date = options.date ?? todayISO();
 
@@ -61,13 +64,12 @@ export async function buildDayRecap(
     fillMissingPhotos(places),
   ]);
 
-  // userId doubles as the sender's display name (see recaps.tsx), but a
-  // freely-typed profile name isn't safe to use as-is in a Firestore doc id.
   const idSafeUserId = userId.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'sender';
   const createdAt = Date.now();
   return {
     id: `${idSafeUserId}_${date}_${createdAt}`,
     userId,
+    senderName,
     recipientId,
     date,
     places: placesWithPhotos,

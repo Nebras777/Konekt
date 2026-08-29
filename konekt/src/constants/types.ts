@@ -32,6 +32,12 @@ export type DaySummary = {
   createdAt: number;
   /** A personal note the sender adds on top of the AI-written summary. */
   highlightNote?: string;
+  /**
+   * The sender's display name at the time of sending. userId is a profile id,
+   * which is not human-readable, so the inbox shows this instead. Optional
+   * because recaps sent before profiles existed don't have it.
+   */
+  senderName?: string;
 };
 
 export const DEMO_USERS = {

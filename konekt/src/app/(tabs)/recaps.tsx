@@ -8,7 +8,8 @@ import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import { DEMO_USERS, type DaySummary } from '@/constants/types';
+import type { DaySummary } from '@/constants/types';
+import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { getInbox } from '../../../services/firestore';
@@ -16,20 +17,25 @@ import { getInbox } from '../../../services/firestore';
 const REACTIONS = ['Love it', 'Proud', 'Call me'] as const;
 
 export default function RecapsScreen() {
+  const { profile, loading: profileLoading } = useAuth();
   // null = still loading, [] = loaded but empty
   const [summaries, setSummaries] = useState<DaySummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!profile) {
+      return;
+    }
     setError(null);
     try {
-      const inbox = await getInbox(DEMO_USERS.recipient);
+      // Recaps other people addressed to this profile.
+      const inbox = await getInbox(profile.id);
       setSummaries(inbox);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load recaps');
       setSummaries([]);
     }
-  }, []);
+  }, [profile]);
 
   useEffect(() => {
     load();
@@ -40,7 +46,13 @@ export default function RecapsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Recaps</ThemedText>
 
-        {summaries === null ? (
+        {profileLoading ? (
+          <View style={styles.centre}>
+            <ActivityIndicator />
+          </View>
+        ) : !profile ? (
+          <Message text="Sign in to see recaps people have shared with you." />
+        ) : summaries === null ? (
           <View style={styles.centre}>
             <ActivityIndicator />
           </View>
@@ -81,7 +93,7 @@ function InboxRecap({ summary }: { summary: DaySummary }) {
         ))}
       </View>
 
-      <ThemedText type="subtitle">{summary.userId}&apos;s day</ThemedText>
+      <ThemedText type="subtitle">{summary.senderName ?? summary.userId}&apos;s day</ThemedText>
       <ThemedText themeColor="textSecondary">{summary.summaryText}</ThemedText>
 
       {summary.highlightNote ? (

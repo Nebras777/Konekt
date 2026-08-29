@@ -9,7 +9,8 @@ import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import { DEMO_USERS, type DaySummary } from '@/constants/types';
+import type { DaySummary } from '@/constants/types';
+import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { getMyDays } from '../../../services/firestore';
@@ -46,6 +47,7 @@ function formatDate(date: string): string {
 
 export default function MemoryLaneScreen() {
   const router = useRouter();
+  const { profile } = useAuth();
   // null = still loading, [] = loaded but empty
   const [days, setDays] = useState<DaySummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,13 +56,19 @@ export default function MemoryLaneScreen() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const myDays = await getMyDays(DEMO_USERS.sender);
+      if (!profile) {
+        setDays([]);
+        return;
+      }
+      const myDays = await getMyDays(profile.id);
       setDays(myDays);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load your memories');
       setDays([]);
     }
-  }, []);
+    // profile arrives asynchronously from storage, so this must re-run when it
+    // does — otherwise the list stays empty from the null first render.
+  }, [profile]);
 
   useEffect(() => {
     load();

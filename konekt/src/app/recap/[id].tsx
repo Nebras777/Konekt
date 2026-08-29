@@ -16,7 +16,7 @@ import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { DEMO_USERS, type DaySummary } from '@/constants/types';
+import type { DaySummary } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
 import { mediaForPlace } from '@/utils/placeMedia';
 
