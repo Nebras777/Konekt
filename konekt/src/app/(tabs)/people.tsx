@@ -433,9 +433,9 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   avatarText: {
-    // The accents are mid-tone, so white initials would be low contrast on the
-    // amber and green. Dark text reads on all five.
-    color: '#25232B',
+    // All five accents are light enough that dark initials read on every one;
+    // white would fail on the amber and the mint.
+    color: '#181B33',
   },
   avatar: {
     width: 40,

@@ -9,37 +9,39 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#F5F3FA',
-    /** Deepest violet-black. Cards sit above this, never below it. */
-    background: '#161327',
+    /** Cool white with a blue cast, so it belongs to the indigo rather than
+     *  sitting on it as a neutral. */
+    text: '#EEF1FF',
+    /** Deepest indigo. Cards sit above this, never below it. */
+    background: '#12142A',
+    /** A white film over the indigo, which picks up the hue beneath. */
+    backgroundElement: 'rgba(255,255,255,0.08)',
+    /** Selected and pressed lift toward the brand periwinkle. */
+    backgroundSelected: 'rgba(141,162,255,0.26)',
+    textSecondary: 'rgba(238,241,255,0.60)',
     /**
-     * Cards are a light film over the violet ground rather than a grey block.
-     * Grey on violet reads as dirty; a white film picks up the hue underneath,
-     * so cards belong to the background instead of sitting on it like stickers.
+     * Amber, and deliberately the only warm thing in the palette. A cool ground
+     * with a single warm accent is what makes the accent read as important —
+     * five competing brights read as decoration.
      */
-    backgroundElement: 'rgba(255,255,255,0.075)',
-    /** Selected and pressed lift toward the primary, not toward white. */
-    backgroundSelected: 'rgba(124,110,230,0.30)',
-    textSecondary: 'rgba(245,243,250,0.62)',
-    primary: '#7C6EE6',
+    primary: '#FFB25C',
   },
 } as const;
 
-export const PrimaryDark = '#5B4BC4';
-/** Text on a filled primary button. */
-export const PrimaryText = '#FFFFFF';
+/** Text on a filled primary button. Amber is light, so dark text sits on it. */
+export const PrimaryText = '#181B33';
+export const PrimaryDark = '#E09A45';
 
-export const TabBarSurface = '#1E1A34';
+export const TabBarSurface = '#191D3A';
 
 /**
- * Background gradient: violet night, lighter at the top.
+ * Background gradient: indigo night, lighter at the top.
  *
- * Light-above-dark is how every sky looks, so it reads as depth rather than as
- * a colour wash. Deep enough that the accents and the filled primary button
- * are the brightest things on screen — which is what makes them the things you
- * look at first.
+ * Indigo rather than violet because the logo runs periwinkle to navy — a violet
+ * ground put the wordmark in a neighbouring hue that never quite agreed with
+ * it. Light above dark reads as depth rather than as a colour wash.
  */
-export const BackgroundGradient = ['#2A2350', '#1E1A3A', '#161327'] as const;
+export const BackgroundGradient = ['#252C5C', '#1A1F40', '#12142A'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -49,11 +51,13 @@ export type ThemeColor = keyof typeof Colors.light;
  * accents disappear.
  */
 export const Accents = {
-  violet: '#7C6EE6',
-  green: '#69B58A',
-  amber: '#E8A84C',
-  pink: '#D875A5',
-  indigo: '#5B4BC4',
+  /** One warm hero, then jewel tones that all sit at a similar lightness — a
+   *  set, rather than five colours borrowed from three different palettes. */
+  amber: '#FFB25C',
+  periwinkle: '#8DA2FF',
+  mint: '#5FD9B4',
+  rose: '#FF8FB1',
+  lilac: '#B79CFF',
 } as const;
 
 /**
@@ -65,7 +69,7 @@ export const Accents = {
 export const Danger = {
   /** No red was specified in the palette, so this is chosen to sit beside the
    *  violet rather than clash with it — slightly rose, not fire-engine. */
-  fill: '#FF6B7A',
+  fill: '#FF7A8A',
   border: 'rgba(224,82,96,0.35)',
   /** Text on the red fill. The theme's text colour is dark and unreadable on it. */
   text: '#FFFFFF',
@@ -76,8 +80,8 @@ export const Surface = {
   /** Brighter on top: a lit upper edge is what makes a flat panel look raised. */
   borderStrong: 'rgba(255,255,255,0.22)',
   shadow: 'rgba(0,0,0,0.5)',
-  /** A violet cast under the primary button, so it appears to glow. */
-  glow: 'rgba(124,110,230,0.55)',
+  /** An amber cast under the primary button, so it appears to glow. */
+  glow: 'rgba(255,178,92,0.45)',
   borderWidth: 1,
 } as const;
 
@@ -102,11 +106,11 @@ export function surfaceFor(index: number): string {
 }
 
 export const AccentList = [
-  Accents.violet,
-  Accents.green,
   Accents.amber,
-  Accents.pink,
-  Accents.indigo,
+  Accents.periwinkle,
+  Accents.mint,
+  Accents.rose,
+  Accents.lilac,
 ] as const;
 
 /**
