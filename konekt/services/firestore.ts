@@ -3,7 +3,6 @@ import {
   addDoc,
   query,
   where,
-  orderBy,
   getDocs,
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
@@ -27,8 +26,9 @@ export async function getInbox(recipientId: string): Promise<DaySummary[]> {
   const q = query(
     collection(db, COLLECTION),
     where('recipientId', '==', recipientId),
-    orderBy('createdAt', 'desc'),
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ ...(d.data() as DaySummary), id: d.id }));
+  return snap.docs
+    .map((d) => ({ ...(d.data() as DaySummary), id: d.id }))
+    .sort((a, b) => b.createdAt - a.createdAt);
 }
