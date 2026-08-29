@@ -376,6 +376,8 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     borderRadius: Radii.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.30)',
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
   },
@@ -390,6 +392,8 @@ const styles = StyleSheet.create({
   },
   saveChip: {
     borderRadius: Radii.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.30)',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },
@@ -406,6 +410,8 @@ const styles = StyleSheet.create({
   },
   reactionChip: {
     borderRadius: Radii.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.30)',
     alignItems: 'center',
     paddingVertical: Spacing.two,
   },

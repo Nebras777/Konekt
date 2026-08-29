@@ -401,6 +401,8 @@ const styles = StyleSheet.create({
   },
   groupChip: {
     borderRadius: Radii.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.half,
   },
@@ -411,6 +413,8 @@ const styles = StyleSheet.create({
   },
   inviteChip: {
     borderRadius: Radii.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(0,229,255,0.65)',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },

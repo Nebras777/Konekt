@@ -297,6 +297,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
+    // Filled, not outlined. This is the one thing a person opens the app to do.
+    backgroundColor: '#00E5FF',
+    shadowColor: Surface.glow,
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
   },
   endDayButton: {
     alignItems: 'center',
@@ -306,7 +313,7 @@ const styles = StyleSheet.create({
     // action and shouts about a step that isn't why anyone opened the screen.
     // It still reads as destructive without being the loudest thing on it.
     backgroundColor: 'transparent',
-    borderWidth: Surface.borderWidth,
+    borderWidth: 2,
     borderColor: Danger.fill,
     marginTop: Spacing.two,
   },
@@ -356,7 +363,9 @@ const styles = StyleSheet.create({
   attachButton: {
     alignItems: 'center',
     paddingVertical: Spacing.two,
-    borderRadius: Spacing.three,
+    borderRadius: Radii.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
   },
   recapButton: {
     marginHorizontal: Spacing.four,
@@ -365,8 +374,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
-    borderWidth: Surface.borderWidth,
-    borderColor: Surface.border,
+    borderWidth: 2,
+    borderColor: '#A855FF',
   },
   pressed: {
     opacity: 0.7,
