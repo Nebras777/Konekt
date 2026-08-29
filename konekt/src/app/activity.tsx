@@ -6,42 +6,10 @@ import { useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import type { Ping, Reaction } from '@/constants/types';
+import type { Reaction } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 
-import { getPingsFor, markPingsSeen } from '../../services/pings';
 import { getReactionsForOwner, markReactionsSeen } from '../../services/reactions';
-
-/** One row in the feed, from either source. */
-type Item = {
-  id: string;
-  createdAt: number;
-  seen: boolean;
-  text: string;
-  source: 'reaction' | 'ping';
-};
-
-function toItems(reactions: Reaction[], pings: Ping[]): Item[] {
-  return [
-    ...reactions.map((r) => ({
-      id: r.id,
-      createdAt: r.createdAt,
-      seen: r.seen,
-      text: `${r.reactorName} reacted “${r.label}” to your recap`,
-      source: 'reaction' as const,
-    })),
-    ...pings.map((p) => ({
-      id: p.id,
-      createdAt: p.createdAt,
-      seen: p.seen,
-      text:
-        p.kind === 'checkin'
-          ? `${p.fromName} is thinking of you — share when you can`
-          : `${p.fromName} let you know they're okay`,
-      source: 'ping' as const,
-    })),
-  ].sort((a, b) => b.createdAt - a.createdAt);
-}
 
 /** Relative time, so a reaction reads as "2h ago" rather than a raw timestamp. */
 function timeAgo(timestamp: number): string {
@@ -56,7 +24,7 @@ function timeAgo(timestamp: number): string {
 
 export default function ActivityScreen() {
   const { profile } = useAuth();
-  const [activity, setActivity] = useState<Item[] | null>(null);
+  const [activity, setActivity] = useState<Reaction[] | null>(null);
 
   const load = useCallback(async () => {
     if (!profile) {
@@ -64,11 +32,7 @@ export default function ActivityScreen() {
       return;
     }
     try {
-      const [reactions, pings] = await Promise.all([
-        getReactionsForOwner(profile.id),
-        getPingsFor(profile.id),
-      ]);
-      setActivity(toItems(reactions, pings));
+      setActivity(await getReactionsForOwner(profile.id));
     } catch {
       setActivity([]);
     }
@@ -83,10 +47,9 @@ export default function ActivityScreen() {
   const unseen = (activity ?? []).filter((r) => !r.seen);
 
   async function markAllRead() {
-    const reactionIds = unseen.filter((i) => i.source === 'reaction').map((i) => i.id);
-    const pingIds = unseen.filter((i) => i.source === 'ping').map((i) => i.id);
-    setActivity((prev) => prev?.map((i) => ({ ...i, seen: true })) ?? prev);
-    await Promise.all([markReactionsSeen(reactionIds), markPingsSeen(pingIds)]);
+    const ids = unseen.map((r) => r.id);
+    setActivity((prev) => prev?.map((r) => ({ ...r, seen: true })) ?? prev);
+    await markReactionsSeen(ids);
   }
 
   return (
@@ -112,7 +75,7 @@ export default function ActivityScreen() {
         ) : activity.length === 0 ? (
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedText type="default" themeColor="textSecondary">
-              Nothing yet. Reactions to your recaps, and check-ins from your people, show up here.
+              No activity yet. When someone reacts to a recap you sent, it shows up here.
             </ThemedText>
           </ThemedView>
         ) : (
@@ -124,7 +87,8 @@ export default function ActivityScreen() {
                 style={styles.row}>
                 <ThemedText type="small" style={styles.rowText}>
                   {item.seen ? '' : '• '}
-                  {item.text}
+                  <ThemedText type="smallBold">{item.reactorName}</ThemedText> reacted “
+                  {item.label}” to your recap
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {timeAgo(item.createdAt)}

@@ -22,23 +22,6 @@ import { getSavedRecapIds, saveRecap, unsaveRecap } from '../../../services/save
 
 import { REACTION_LABELS, type ReactionLabel } from '@/constants/types';
 
-/**
- * How long a received recap stays in the inbox.
- *
- * A recap is a message between two people, not a permanent record — so it goes
- * unless the recipient chose to keep it. Saving is what makes one stay, which
- * is also what makes the Save button mean something.
- *
- * Nothing is deleted: an expired recap is hidden from the inbox but still
- * exists, and stays in the sender's own Memory Lane. Their history is theirs.
- */
-const RECAP_LIFETIME_DAYS = 7;
-const RECAP_LIFETIME_MS = RECAP_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
-
-function isExpired(summary: DaySummary): boolean {
-  return Date.now() - summary.createdAt > RECAP_LIFETIME_MS;
-}
-
 export default function RecapsScreen() {
   const { profile, loading: profileLoading } = useAuth();
   // null = still loading, [] = loaded but empty
@@ -156,23 +139,12 @@ export default function RecapsScreen() {
   // recap by id, so one whose recap was deleted can never be shown and counting
   // it promises a row that will never appear.
   const savedVisible = (summaries ?? []).filter((s) => savedIds.has(s.id));
-
-  // Expired recaps stay only if they were saved.
-  const current = (summaries ?? []).filter((s) => !isExpired(s) || savedIds.has(s.id));
-  const expiredCount = (summaries ?? []).length - current.length;
-  const visible = showSavedOnly ? savedVisible : current;
+  const visible = showSavedOnly ? savedVisible : (summaries ?? []);
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Recaps</ThemedText>
-
-        {expiredCount > 0 && !showSavedOnly ? (
-          <ThemedText type="small" themeColor="textSecondary">
-            {expiredCount} older recap{expiredCount === 1 ? '' : 's'} expired. Save one to keep
-            it next time.
-          </ThemedText>
-        ) : null}
 
         {summaries && summaries.length > 0 ? (
           <View style={styles.filterRow}>

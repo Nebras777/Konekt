@@ -14,8 +14,6 @@ import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useAuth } from '@/hooks/use-auth';
 
-import { getContacts } from '../../../services/contacts';
-import { getPingsFor, sendPingToMany } from '../../../services/pings';
 import { getReactionsForOwner } from '../../../services/reactions';
 
 import { totalDistanceKm } from '../../../services/sendRecap';
@@ -29,51 +27,12 @@ export default function TodayScreen() {
 
   // Unread count for the bell. The list itself lives on the activity screen.
   const [unseenCount, setUnseenCount] = useState(0);
-  const [okayState, setOkayState] = useState<'idle' | 'sending' | 'sent'>('idle');
-
-  /**
-   * "I'm okay" — reassurance without a recap. Most days there is nothing to
-   * report and the only thing anyone actually wants to know is that you're
-   * fine, which shouldn't require capturing stops or generating a summary.
-   */
-  async function sendOkay() {
-    if (!profile) return;
-    setOkayState('sending');
-    try {
-      const contacts = await getContacts(profile.id);
-      const toIds = contacts
-        .filter((c) => c.status === 'active' && c.profileId)
-        .map((c) => c.profileId as string);
-
-      if (toIds.length === 0) {
-        Alert.alert('Nobody to tell yet', 'Invite someone on the People tab first.');
-        setOkayState('idle');
-        return;
-      }
-
-      await sendPingToMany({
-        kind: 'okay',
-        fromId: profile.id,
-        fromName: profile.name,
-        toIds,
-      });
-      setOkayState('sent');
-    } catch {
-      setOkayState('idle');
-      Alert.alert('Could not send', 'Something went wrong. Try again.');
-    }
-  }
 
   const loadActivity = useCallback(async () => {
     if (!profile) return;
     try {
-      const [reactions, pings] = await Promise.all([
-        getReactionsForOwner(profile.id),
-        getPingsFor(profile.id),
-      ]);
-      setUnseenCount(
-        reactions.filter((r) => !r.seen).length + pings.filter((p) => !p.seen).length,
-      );
+      const reactions = await getReactionsForOwner(profile.id);
+      setUnseenCount(reactions.filter((r) => !r.seen).length);
     } catch {
       // Activity is a nice-to-have; a failure shouldn't blank the screen.
     }
@@ -199,25 +158,6 @@ export default function TodayScreen() {
             </ThemedText>
           ) : null}
 
-          <Pressable
-            onPress={sendOkay}
-            disabled={okayState !== 'idle'}
-            accessibilityRole="button">
-            {({ pressed }) => (
-              <ThemedView
-                type="backgroundElement"
-                style={[styles.okayButton, pressed && styles.pressed]}>
-                <ThemedText type="smallBold">
-                  {okayState === 'sending'
-                    ? 'Sending…'
-                    : okayState === 'sent'
-                      ? "✓ They know you're okay"
-                      : "I'm okay — tell my people"}
-                </ThemedText>
-              </ThemedView>
-            )}
-          </Pressable>
-
           <Pressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
             {({ pressed }) => (
               <ThemedView
@@ -335,11 +275,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
-  },
-  okayButton: {
-    alignItems: 'center',
-    paddingVertical: Spacing.three,
-    borderRadius: Spacing.four,
   },
   captureButton: {
     alignItems: 'center',
