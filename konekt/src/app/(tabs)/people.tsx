@@ -140,6 +140,16 @@ export default function PeopleScreen() {
     [profile, load],
   );
 
+  /**
+   * Who sent an invite. Prefers the live profile — a stored ownerName is a
+   * snapshot from invite time, and invites written before ownerName existed
+   * have none at all, which is what rendered "Someone".
+   */
+  function inviterName(connection: Connection): string {
+    const live = profiles.find((p) => p.id === connection.ownerId);
+    return live?.name ?? connection.ownerName ?? 'Someone';
+  }
+
   const pendingIncoming = incoming.filter((c) => c.status === 'pending');
   // Invites you've accepted: these people's recaps arrive in your Recaps tab.
   const sharingWithYou = incoming.filter((c) => c.status === 'active');
@@ -161,7 +171,7 @@ export default function PeopleScreen() {
             {pendingIncoming.map((invite) => (
               <ThemedView key={invite.id} type="backgroundElement" style={styles.inviteRow}>
                 <ThemedText type="smallBold">
-                  {invite.ownerName ?? 'Someone'} wants to share their days
+                  {inviterName(invite)} wants to share their days
                 </ThemedText>
                 <View style={styles.respondRow}>
                   <Pressable
@@ -198,7 +208,7 @@ export default function PeopleScreen() {
             <ThemedText type="smallBold">Sharing with you</ThemedText>
             {sharingWithYou.map((connection) => (
               <ThemedView key={connection.id} type="backgroundElement" style={styles.inviteRow}>
-                <ThemedText type="smallBold">{connection.ownerName ?? 'Someone'}</ThemedText>
+                <ThemedText type="smallBold">{inviterName(connection)}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   Their recaps arrive in Recaps
                 </ThemedText>

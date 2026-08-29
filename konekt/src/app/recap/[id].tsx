@@ -22,6 +22,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
+import { getContacts } from '../../../services/contacts';
 import { getDaySummaryById } from '../../../services/firestore';
 import { sendRecapToConnections, totalDistanceKm } from '../../../services/sendRecap';
 
@@ -40,6 +41,36 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   const [sendError, setSendError] = useState<string | null>(null);
 
   const [note, setNote] = useState(daySummary.highlightNote ?? '');
+
+  // Who this will actually go to. recipientId on the draft is a profile id (or
+  // the demo fallback), so showing it raw put "family_demo" on the button.
+  const [recipients, setRecipients] = useState<string[]>([]);
+  useEffect(() => {
+    if (!profile || readOnly) {
+      return;
+    }
+    let cancelled = false;
+    getContacts(profile.id)
+      .then((contacts) => {
+        if (cancelled) return;
+        setRecipients(
+          contacts.filter((c) => c.status === 'active' && c.profileId).map((c) => c.name),
+        );
+      })
+      .catch(() => {
+        // Non-fatal: the button falls back to a generic label.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [profile, readOnly]);
+
+  const sendLabel =
+    recipients.length === 0
+      ? 'Send'
+      : recipients.length === 1
+        ? `Send to ${recipients[0]}`
+        : `Send to ${recipients.length} people`;
 
   function toggleExcluded(index: number) {
     setExcludedStops((prev) => {
@@ -184,7 +215,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
                       type="backgroundSelected"
                       style={[styles.primaryButton, pressed && styles.pressed]}>
                       <ThemedText type="smallBold">
-                        {sending ? 'Sending…' : `Send to ${daySummary.recipientId}`}
+                        {sending ? 'Sending…' : sendLabel}
                       </ThemedText>
                     </ThemedView>
                   )}
