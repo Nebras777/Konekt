@@ -180,6 +180,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
               <DayCard
                 key={`${place.name}-${index}`}
                 index={index}
+                placeType={place.type}
                 time={place.time}
                 title={place.name}
                 subtitle={place.subtitle}

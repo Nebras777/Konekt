@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -172,11 +173,15 @@ export default function TodayScreen() {
 
           <Pressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
             {({ pressed }) => (
-              <View style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
+              <LinearGradient
+                colors={['#00E5FF', '#3DFF9A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
                 <ThemedText type="smallBold" style={{ color: PrimaryText }}>
                   {isCapturing ? 'Finding you…' : 'Capture this place'}
                 </ThemedText>
-              </View>
+              </LinearGradient>
             )}
           </Pressable>
 
@@ -187,6 +192,7 @@ export default function TodayScreen() {
                 <DayCard
                   key={`${place.name}-${index}`}
                   index={index}
+                  placeType={place.type}
                   time={place.time}
                   title={place.name}
                   subtitle={place.subtitle}>
@@ -304,8 +310,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
-    // Filled, not outlined. This is the one thing a person opens the app to do.
-    backgroundColor: '#00E5FF',
+    // Filled with a gradient, not a flat colour. This is the one thing a person
+    // opens the app to do, and it should look like it.
     shadowColor: Surface.glow,
     shadowOpacity: 1,
     shadowRadius: 20,
@@ -371,7 +377,7 @@ const styles = StyleSheet.create({
   statTile: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: Radii.lg,
+    borderRadius: Radii.xl,
     borderWidth: Surface.borderWidth,
     borderColor: Surface.borderStrong,
     borderTopColor: 'rgba(255,255,255,0.55)',

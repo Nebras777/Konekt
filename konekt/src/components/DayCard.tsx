@@ -5,7 +5,23 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { accentFor, Radii, Spacing, Surface, surfaceFor, tiltFor } from '@/constants/theme';
+import type { PlaceType } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
+
+/**
+ * A small glyph per kind of place. Text rather than an icon font, so it needs
+ * no dependency and renders identically everywhere.
+ */
+const TYPE_GLYPH: Record<PlaceType, string> = {
+  home: '🏠',
+  study: '📚',
+  food: '🍜',
+  social: '🎉',
+  gym: '🏊',
+  transit: '🚌',
+  outdoor: '🌳',
+  other: '📍',
+};
 
 export type DayCardProps = {
   time: string;
@@ -16,6 +32,8 @@ export type DayCardProps = {
   children?: ReactNode;
   /** Position in a list, used to vary the tilt so stacked cards don't align. */
   index?: number;
+  /** Kind of place, shown as a glyph beside the time. */
+  placeType?: PlaceType;
 };
 
 export function DayCard({
@@ -26,6 +44,7 @@ export function DayCard({
   onToggleExclude,
   children,
   index = 0,
+  placeType = 'other',
 }: DayCardProps) {
   const theme = useTheme();
   const included = !excluded;
@@ -44,9 +63,12 @@ export function DayCard({
       ]}>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            {time}
-          </ThemedText>
+          <View style={styles.timeRow}>
+            <ThemedText style={styles.glyph}>{TYPE_GLYPH[placeType]}</ThemedText>
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              {time}
+            </ThemedText>
+          </View>
           <ThemedText type="default">{title}</ThemedText>
           {subtitle ? (
             <ThemedText type="small" themeColor="textSecondary">
@@ -108,6 +130,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: Spacing.two,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  glyph: {
+    fontSize: 16,
   },
   headerText: {
     flex: 1,

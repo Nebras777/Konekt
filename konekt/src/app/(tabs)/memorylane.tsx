@@ -187,6 +187,7 @@ function MemoryRecapCard({ day, onViewFull }: { day: DaySummary; onViewFull: () 
           <DayCard
             key={`${place.name}-${index}`}
             index={index}
+            placeType={place.type}
             time={place.time}
             title={place.name}
             subtitle={place.subtitle}>
