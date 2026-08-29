@@ -159,5 +159,11 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+/**
+ * Space a screen must leave at the bottom so its content clears the tab bar.
+ *
+ * The bar floats now — 54 tall, sitting 18 above the screen edge — so content
+ * scrolling underneath it would otherwise be hidden rather than merely tight.
+ */
+export const BottomTabInset = 84;
 export const MaxContentWidth = 800;

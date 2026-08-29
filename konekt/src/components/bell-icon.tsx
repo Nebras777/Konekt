@@ -3,42 +3,58 @@ import { View } from 'react-native';
 /**
  * A bell drawn from plain views.
  *
- * The header previously used the 🔔 emoji, which can't be recoloured — emoji
- * carry their own palette. Drawing it means it can take any colour, and it
- * needs no icon-font dependency.
+ * The header used the 🔔 emoji, which can't be recoloured — emoji carry their
+ * own palette. An icon font would be better, but @expo/vector-icons isn't
+ * installed, so this is drawn instead: four rectangles, shaped by radii.
+ *
+ * The proportions matter. An earlier version made the dome as wide as it was
+ * tall with a full radius, which just reads as a circle.
  */
 export function BellIcon({ color, size = 22 }: { color: string; size?: number }) {
-  const domeWidth = size * 0.66;
+  const unit = size / 22;
 
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'flex-start' }}>
+      {/* the little stem on top */}
       <View
         style={{
-          width: domeWidth,
-          height: domeWidth * 0.8,
-          borderTopLeftRadius: domeWidth / 2,
-          borderTopRightRadius: domeWidth / 2,
-          borderBottomLeftRadius: 3,
-          borderBottomRightRadius: 3,
+          width: 3 * unit,
+          height: 3 * unit,
+          borderRadius: 2 * unit,
           backgroundColor: color,
         }}
       />
+      {/* the body: taller than wide, rounded at the top, squared at the base */}
       <View
         style={{
-          width: size * 0.88,
-          height: 2.5,
-          borderRadius: 2,
+          width: 12 * unit,
+          height: 11 * unit,
+          borderTopLeftRadius: 6 * unit,
+          borderTopRightRadius: 6 * unit,
+          borderBottomLeftRadius: 1.5 * unit,
+          borderBottomRightRadius: 1.5 * unit,
           backgroundColor: color,
-          marginTop: 1,
+          marginTop: -0.5 * unit,
         }}
       />
+      {/* the rim, wider than the body — this is what makes it read as a bell */}
       <View
         style={{
-          width: 4.5,
-          height: 4.5,
-          borderRadius: 3,
+          width: 18 * unit,
+          height: 2.2 * unit,
+          borderRadius: 1.2 * unit,
           backgroundColor: color,
-          marginTop: 1.5,
+          marginTop: 0.6 * unit,
+        }}
+      />
+      {/* the clapper */}
+      <View
+        style={{
+          width: 4 * unit,
+          height: 4 * unit,
+          borderRadius: 2.5 * unit,
+          backgroundColor: color,
+          marginTop: 0.8 * unit,
         }}
       />
     </View>
