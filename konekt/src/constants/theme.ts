@@ -9,20 +9,20 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Deep sea navy. Reads as the dark end of the same blue rather than as
-     *  an unrelated black dropped on top. */
-    text: '#0E3556',
+    /** Deep indigo. Reads as the dark end of the same periwinkle rather than
+     *  as an unrelated black dropped on top. */
+    text: '#1B2A5E',
     /** Base colour, the gradient's first stop, so nothing flashes white. */
-    background: '#8FE1FF',
+    background: '#B9D5FE',
     /**
      * Cards are white, slightly translucent, so the sky shows faintly through.
-     * Cards high on a screen pick up cyan and lower ones periwinkle, which
-     * varies a list without giving cards different colours.
+     * Cards high on a screen pick up powder blue and lower ones periwinkle,
+     * which varies a list without giving cards different colours.
      */
-    backgroundElement: 'rgba(255,255,255,0.86)',
+    backgroundElement: 'rgba(255,255,255,0.88)',
     /** Selected and pressed: solid white, the brightest thing available. */
     backgroundSelected: '#FFFFFF',
-    textSecondary: 'rgba(14,53,86,0.60)',
+    textSecondary: 'rgba(27,42,94,0.62)',
     /** Accent for switches: coral, the complement of sky blue. */
     primary: '#FF7A59',
   },
@@ -32,13 +32,13 @@ export const Colors = {
 export const TabBarSurface = '#FFFFFF';
 
 /**
- * Background gradient: cyan into sky into periwinkle.
+ * Background gradient: powder blue into periwinkle.
  *
- * Light and airy — the palette's warmth comes from the accents sitting on it,
- * not from the background. Pale enough that dark text needs no help, which is
- * what lets the cards stay light instead of heavy.
+ * Softer and more violet-leaning than a cyan sky — quiet enough to sit behind
+ * content all day without tiring, and pale enough at the top that dark text
+ * needs no help, which is what lets cards stay light instead of heavy.
  */
-export const BackgroundGradient = ['#8FE1FF', '#7FC8FB', '#79ADF2'] as const;
+export const BackgroundGradient = ['#B9D5FE', '#9CB6F9', '#8091EF'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -73,11 +73,11 @@ export const Danger = {
 export const Surface = {
   /** A soft navy hairline. The heavy ink outline of the previous scheme fought
    *  the softness of this one — airy backgrounds want thin edges. */
-  border: 'rgba(14,53,86,0.10)',
+  border: 'rgba(27,42,94,0.10)',
   /** A white top edge, so a card looks lit from above rather than cut out. */
   borderStrong: 'rgba(255,255,255,0.95)',
   /** Blue-tinted, so shadows sit in the sky rather than greying it. */
-  shadow: 'rgba(20,70,120,0.20)',
+  shadow: 'rgba(50,70,150,0.18)',
   borderWidth: 1,
 } as const;
 
