@@ -31,7 +31,6 @@ const TOGGLES: { key: keyof PrivacySettings; label: string; hint?: string }[] = 
     label: 'Share location with others',
     hint: 'Off: people you filed as Other get your recap without the map or stops.',
   },
-  { key: 'includePhotos', label: 'Include photos in recaps' },
 ];
 
 export default function PrivacyScreen() {

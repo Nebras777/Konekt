@@ -36,7 +36,12 @@ function groupByDate(days: DaySummary[]): DayGroup[] {
 }
 
 function formatDate(date: string): string {
-  const parsed = new Date(date);
+  // new Date('2026-08-30') parses as UTC midnight, which then renders as the
+  // previous day anywhere west of Greenwich. Build it from the parts so the
+  // date shown is the date stored.
+  const [year, month, day] = date.split('-').map(Number);
+  const parsed =
+    year && month && day ? new Date(year, month - 1, day) : new Date(date);
   if (Number.isNaN(parsed.getTime())) return date;
   return parsed.toLocaleDateString(undefined, {
     weekday: 'long',

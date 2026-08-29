@@ -16,7 +16,6 @@ export type PrivacySettings = {
   shareLocationWithFamily: boolean;
   shareLocationWithFriends: boolean;
   shareLocationWithOthers: boolean;
-  includePhotos: boolean;
 };
 
 /** Sharing is on unless the user turns it off. */
@@ -24,7 +23,6 @@ export const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
   shareLocationWithFamily: true,
   shareLocationWithFriends: true,
   shareLocationWithOthers: true,
-  includePhotos: true,
 };
 
 export async function getPrivacySettings(profileId: string): Promise<PrivacySettings> {

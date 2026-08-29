@@ -13,8 +13,19 @@ type BuildRecapOptions = {
   date?: string; // "2026-08-29"; defaults to today
 };
 
+/**
+ * Today's date as YYYY-MM-DD in the device's own timezone.
+ *
+ * Deliberately not toISOString(), which converts to UTC first: Sydney is
+ * UTC+10, so anything recorded before 10am local would be stamped with
+ * yesterday's date. A day is what the user lived, not what the prime meridian
+ * was doing at the time.
+ */
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 // Straight-line distance between two coordinates, in km (haversine formula).
