@@ -9,33 +9,37 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Near-white with a violet cast, matching the tint of the surfaces. */
-    text: '#F4F3F8',
-    /** The page behind the cards — darker than them, so cards read as raised. */
-    background: '#1B1A21',
-    /** Cards: dark grey, a step lighter than the page. */
-    backgroundElement: '#2E2C38',
-    /** Selected and pressed: lifted toward the violet primary. */
-    backgroundSelected: '#413C58',
-    textSecondary: '#A6A2B3',
-    /** The palette's violet, which carries well on a dark ground. */
+    text: '#F5F3FA',
+    /** Deepest violet-black. Cards sit above this, never below it. */
+    background: '#161327',
+    /**
+     * Cards are a light film over the violet ground rather than a grey block.
+     * Grey on violet reads as dirty; a white film picks up the hue underneath,
+     * so cards belong to the background instead of sitting on it like stickers.
+     */
+    backgroundElement: 'rgba(255,255,255,0.075)',
+    /** Selected and pressed lift toward the primary, not toward white. */
+    backgroundSelected: 'rgba(124,110,230,0.30)',
+    textSecondary: 'rgba(245,243,250,0.62)',
     primary: '#7C6EE6',
   },
 } as const;
 
-/** The darker primary, for pressed states and emphasis. */
 export const PrimaryDark = '#5B4BC4';
+/** Text on a filled primary button. */
+export const PrimaryText = '#FFFFFF';
 
-/** Solid surface for the tab bar. Native bars render alpha unreliably. */
-export const TabBarSurface = '#2E2C38';
+export const TabBarSurface = '#1E1A34';
 
 /**
- * Background gradient: near-black easing to the palette's darkest grey.
+ * Background gradient: violet night, lighter at the top.
  *
- * Shallow on purpose. The contrast that matters here is between the page and
- * the cards sitting on it; a strong background gradient competes with that.
+ * Light-above-dark is how every sky looks, so it reads as depth rather than as
+ * a colour wash. Deep enough that the accents and the filled primary button
+ * are the brightest things on screen — which is what makes them the things you
+ * look at first.
  */
-export const BackgroundGradient = ['#25232B', '#1E1C24', '#17161D'] as const;
+export const BackgroundGradient = ['#2A2350', '#1E1A3A', '#161327'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -61,18 +65,19 @@ export const Accents = {
 export const Danger = {
   /** No red was specified in the palette, so this is chosen to sit beside the
    *  violet rather than clash with it — slightly rose, not fire-engine. */
-  fill: '#E05260',
+  fill: '#FF6B7A',
   border: 'rgba(224,82,96,0.35)',
   /** Text on the red fill. The theme's text colour is dark and unreadable on it. */
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  /** A light edge now: on dark surfaces a dark border is invisible. */
   border: 'rgba(255,255,255,0.10)',
-  /** Brighter on top, so a card looks lit from above rather than cut out. */
-  borderStrong: 'rgba(255,255,255,0.20)',
-  shadow: 'rgba(0,0,0,0.45)',
+  /** Brighter on top: a lit upper edge is what makes a flat panel look raised. */
+  borderStrong: 'rgba(255,255,255,0.22)',
+  shadow: 'rgba(0,0,0,0.5)',
+  /** A violet cast under the primary button, so it appears to glow. */
+  glow: 'rgba(124,110,230,0.55)',
   borderWidth: 1,
 } as const;
 
@@ -90,7 +95,7 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['#2E2C38', '#322F3C', '#2B2934', '#353140'] as const;
+const CARD_TINTS = ['rgba(255,255,255,0.07)', 'rgba(255,255,255,0.095)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0.11)'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];

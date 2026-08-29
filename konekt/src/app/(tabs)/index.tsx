@@ -10,7 +10,14 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { AccentList, Danger, Radii, Spacing, Surface } from '@/constants/theme';
+import {
+  AccentList,
+  Danger,
+  PrimaryText,
+  Radii,
+  Spacing,
+  Surface,
+} from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useTheme } from '@/hooks/use-theme';
@@ -163,13 +170,11 @@ export default function TodayScreen() {
 
           <Pressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
             {({ pressed }) => (
-              <ThemedView
-                type="backgroundSelected"
-                style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
-                <ThemedText type="smallBold">
+              <View style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
+                <ThemedText type="smallBold" style={{ color: PrimaryText }}>
                   {isCapturing ? 'Finding you…' : 'Capture this place'}
                 </ThemedText>
-              </ThemedView>
+              </View>
             )}
           </Pressable>
 
@@ -228,7 +233,7 @@ export default function TodayScreen() {
           <Pressable onPress={confirmEndDay} accessibilityRole="button">
             {({ pressed }) => (
               <View style={[styles.endDayButton, pressed && styles.pressed]}>
-                <ThemedText type="smallBold" style={{ color: Danger.text }}>
+                <ThemedText type="smallBold" style={{ color: Danger.fill }}>
                   End day
                 </ThemedText>
               </View>
@@ -252,10 +257,11 @@ function Stat({
   tilt: string;
 }) {
   return (
-    <ThemedView
-      type="backgroundElement"
-      style={[styles.statTile, { borderColor: accent, transform: [{ rotate: tilt }] }]}>
-      <ThemedText type="subtitle">{value}</ThemedText>
+    <ThemedView type="backgroundElement" style={[styles.statTile, { transform: [{ rotate: tilt }] }]}>
+      <View style={[styles.statDot, { backgroundColor: accent }]} />
+      <ThemedText type="title" style={[styles.statValue, { color: accent }]}>
+        {value}
+      </ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
         {label}
       </ThemedText>
@@ -296,9 +302,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
-    backgroundColor: Danger.fill,
+    // Outlined rather than filled: a solid red block competes with the primary
+    // action and shouts about a step that isn't why anyone opened the screen.
+    // It still reads as destructive without being the loudest thing on it.
+    backgroundColor: 'transparent',
     borderWidth: Surface.borderWidth,
-    borderColor: Danger.border,
+    borderColor: Danger.fill,
     marginTop: Spacing.two,
   },
   safeArea: {
@@ -324,10 +333,22 @@ const styles = StyleSheet.create({
   statTile: {
     flex: 1,
     alignItems: 'center',
-    borderWidth: 2,
     borderRadius: Radii.lg,
+    borderWidth: Surface.borderWidth,
+    borderColor: Surface.border,
+    borderTopColor: Surface.borderStrong,
     paddingVertical: Spacing.three,
     gap: Spacing.half,
+  },
+  statDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginBottom: Spacing.one,
+  },
+  statValue: {
+    fontSize: 30,
+    lineHeight: 34,
   },
   stopsList: {
     gap: Spacing.two,
