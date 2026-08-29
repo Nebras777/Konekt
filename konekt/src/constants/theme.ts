@@ -11,28 +11,28 @@ export const Colors = {
   light: {
     /** Cool white with a blue cast, so it belongs to the indigo rather than
      *  sitting on it as a neutral. */
-    text: '#EEF1FF',
+    text: '#F2F6FF',
     /** The gradient's darkest stop. Cards sit above this, never below it. */
-    background: '#242A57',
+    background: '#08091A',
     /** A white film over the indigo, which picks up the hue beneath. */
-    backgroundElement: 'rgba(255,255,255,0.11)',
+    backgroundElement: 'rgba(255,255,255,0.065)',
     /** Selected and pressed lift toward the brand periwinkle. */
-    backgroundSelected: 'rgba(255,255,255,0.22)',
-    textSecondary: 'rgba(238,241,255,0.60)',
+    backgroundSelected: 'rgba(0,229,255,0.20)',
+    textSecondary: 'rgba(242,246,255,0.58)',
     /**
      * Amber, and deliberately the only warm thing in the palette. A cool ground
      * with a single warm accent is what makes the accent read as important —
      * five competing brights read as decoration.
      */
-    primary: '#FFC14D',
+    primary: '#00E5FF',
   },
 } as const;
 
 /** Text on a filled primary button. Amber is light, so dark text sits on it. */
-export const PrimaryText = '#181B33';
-export const PrimaryDark = '#E5A733';
+export const PrimaryText = '#04060F';
+export const PrimaryDark = '#00B8CC';
 
-export const TabBarSurface = '#2B3167';
+export const TabBarSurface = '#101230';
 
 /**
  * Background gradient: indigo night, lighter at the top.
@@ -44,7 +44,7 @@ export const TabBarSurface = '#2B3167';
  * Lifted well off black: the darker version was heavy, and a mid indigo still
  * carries white text comfortably while letting the accents sing on top of it.
  */
-export const BackgroundGradient = ['#4A50A6', '#353B80', '#242A57'] as const;
+export const BackgroundGradient = ['#1B1D45', '#101230', '#08091A'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -55,18 +55,16 @@ export type ThemeColor = keyof typeof Colors.light;
  */
 export const Accents = {
   /**
-   * Candy-bright, and all at a similar lightness so no one of them looks like
-   * a mistake next to the others.
-   *
-   * Periwinkle is gone: the ground moved toward it, and an accent a shade away
-   * from the background stops being an accent. Cyan does the same job with the
-   * contrast the periwinkle lost.
+   * Neon: high saturation and high lightness both, which is what separates a
+   * neon from a merely bright colour. They only work over a near-black ground —
+   * the same values on the previous mid indigo would have looked garish rather
+   * than lit.
    */
-  amber: '#FFC14D',
-  mint: '#3FE0B5',
-  rose: '#FF83B9',
-  cyan: '#65D8FF',
-  lilac: '#C3A4FF',
+  cyan: '#00E5FF',
+  magenta: '#FF2E97',
+  lime: '#3DFF9A',
+  yellow: '#FFE83D',
+  violet: '#A855FF',
 } as const;
 
 /**
@@ -78,19 +76,21 @@ export const Accents = {
 export const Danger = {
   /** No red was specified in the palette, so this is chosen to sit beside the
    *  violet rather than clash with it — slightly rose, not fire-engine. */
-  fill: '#FF7A8A',
+  fill: '#FF4D6D',
   border: 'rgba(224,82,96,0.35)',
   /** Text on the red fill. The theme's text colour is dark and unreadable on it. */
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  border: 'rgba(255,255,255,0.10)',
-  /** Brighter on top: a lit upper edge is what makes a flat panel look raised. */
-  borderStrong: 'rgba(255,255,255,0.22)',
+  border: 'rgba(255,255,255,0.09)',
+  /** Brighter on top: a lit upper edge is what makes a flat panel look raised.
+   *  Stronger here than on a lighter ground — a faint edge disappears entirely
+   *  against near-black. */
+  borderStrong: 'rgba(255,255,255,0.26)',
   shadow: 'rgba(0,0,0,0.5)',
   /** An amber cast under the primary button, so it appears to glow. */
-  glow: 'rgba(255,193,77,0.50)',
+  glow: 'rgba(0,229,255,0.55)',
   borderWidth: 1,
 } as const;
 
@@ -108,18 +108,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.13)', 'rgba(255,255,255,0.115)', 'rgba(255,255,255,0.145)'] as const;
+const CARD_TINTS = ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.085)', 'rgba(255,255,255,0.07)', 'rgba(255,255,255,0.10)'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];
 }
 
 export const AccentList = [
-  Accents.amber,
-  Accents.mint,
-  Accents.rose,
   Accents.cyan,
-  Accents.lilac,
+  Accents.magenta,
+  Accents.lime,
+  Accents.yellow,
+  Accents.violet,
 ] as const;
 
 /**

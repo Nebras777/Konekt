@@ -433,9 +433,9 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   avatarText: {
-    // All five accents are light enough that dark initials read on every one;
-    // white would fail on the amber and the mint.
-    color: '#181B33',
+    // Neons are high-lightness, so dark initials read on all five; white would
+    // disappear on the cyan, lime and yellow.
+    color: '#04060F',
   },
   avatar: {
     width: 40,
