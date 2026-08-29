@@ -1,6 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
@@ -10,6 +17,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { DEMO_USERS, type DaySummary } from '@/constants/types';
+import { useTheme } from '@/hooks/use-theme';
+import { mediaForPlace } from '@/utils/placeMedia';
 
 import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
 import { getDaySummaryById, saveDaySummary } from '../../../services/firestore';
@@ -79,9 +88,12 @@ export type RecapScreenContentProps = {
 
 export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreenContentProps) {
   const router = useRouter();
+  const theme = useTheme();
   const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+
+  const [note, setNote] = useState(daySummary.highlightNote ?? '');
 
   function toggleExcluded(index: number) {
     setExcludedStops((prev) => {
@@ -99,7 +111,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   // a stop the sender has hidden must not still show up for the recipient.
   const visiblePlaces = daySummary.places.filter((_, index) => !excludedStops.has(index));
   const distanceKm = readOnly ? daySummary.distanceKm : totalDistanceKm(visiblePlaces);
-  const photoCount = visiblePlaces.filter((place) => place.photoUrl).length;
+  const photoCount = visiblePlaces.filter((place) => place.photoUrl || place.mediaUri).length;
 
   function handleCancel() {
     clearDraftRecap(daySummary.id);
@@ -114,6 +126,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
         ...daySummary,
         places: visiblePlaces,
         distanceKm: totalDistanceKm(visiblePlaces),
+        highlightNote: note.trim() || undefined,
       });
       clearDraftRecap(daySummary.id);
       router.replace('/');
@@ -151,10 +164,34 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
                 subtitle={place.subtitle}
                 excluded={excludedStops.has(index)}
                 onToggleExclude={readOnly ? undefined : () => toggleExcluded(index)}>
-                {place.photoUrl ? <PhotoGrid photos={[place.photoUrl]} /> : null}
+                <PhotoGrid photos={mediaForPlace(place)} />
               </DayCard>
             ))}
           </View>
+
+          {readOnly ? (
+            daySummary.highlightNote ? (
+              <ThemedView type="backgroundElement" style={styles.noteCard}>
+                <ThemedText type="smallBold">Highlight</ThemedText>
+                <ThemedText themeColor="textSecondary">{daySummary.highlightNote}</ThemedText>
+              </ThemedView>
+            ) : null
+          ) : (
+            <View style={styles.noteSection}>
+              <ThemedText type="smallBold">Add a highlight (optional)</ThemedText>
+              <TextInput
+                value={note}
+                onChangeText={setNote}
+                placeholder="What was the best part of your day?"
+                placeholderTextColor={theme.textSecondary}
+                multiline
+                style={[
+                  styles.noteInput,
+                  { color: theme.text, backgroundColor: theme.backgroundElement },
+                ]}
+              />
+            </View>
+          )}
 
           {!readOnly ? (
             <View style={styles.actionsSection}>
@@ -312,6 +349,20 @@ const styles = StyleSheet.create({
   },
   stopsList: {
     gap: Spacing.two,
+  },
+  noteCard: {
+    borderRadius: Spacing.four,
+    padding: Spacing.four,
+    gap: Spacing.one,
+  },
+  noteSection: {
+    gap: Spacing.two,
+  },
+  noteInput: {
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    minHeight: 70,
+    textAlignVertical: 'top',
   },
   actionsSection: {
     gap: Spacing.two,

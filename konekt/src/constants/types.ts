@@ -1,11 +1,14 @@
 export type PlaceVisit = {
-  name: string;       
-  type: PlaceType;     
+  name: string;
+  type: PlaceType;
   lat: number;
   lng: number;
-  time: string;         
-  subtitle?: string;    
-  photoUrl?: string;  
+  time: string;
+  subtitle?: string;
+  photoUrl?: string;
+  /** A real photo/video the user picked for this stop, from their own device. */
+  mediaUri?: string;
+  mediaType?: 'photo' | 'video';
 };
 
 export type PlaceType =
@@ -24,9 +27,11 @@ export type DaySummary = {
   recipientId: string;     
   date: string;            
   places: PlaceVisit[];
-  summaryText: string;      
-  distanceKm?: number;      
-  createdAt: number;       
+  summaryText: string;
+  distanceKm?: number;
+  createdAt: number;
+  /** A personal note the sender adds on top of the AI-written summary. */
+  highlightNote?: string;
 };
 
 export const DEMO_USERS = {
