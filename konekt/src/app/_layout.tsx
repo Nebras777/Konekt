@@ -17,6 +17,10 @@ export default function RootLayout() {
           name="add-person"
           options={{ title: 'Add person', presentation: 'modal' }}
         />
+        <Stack.Screen
+          name="signup"
+          options={{ title: 'Create profile', presentation: 'modal' }}
+        />
       </Stack>
     </ThemeProvider>
   );

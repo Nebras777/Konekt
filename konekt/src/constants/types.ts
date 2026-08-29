@@ -57,3 +57,10 @@ export type Connection = {
   relationship: ConnectionRelationship;
   status: ConnectionStatus;
 };
+
+// The app user's own identity, created at sign-up.
+export type Profile = {
+  id: string;
+  name: string;
+  createdAt: number;
+};
