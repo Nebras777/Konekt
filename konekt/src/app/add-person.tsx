@@ -9,6 +9,8 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { ConnectionRelationship } from '@/constants/types';
 
+import { addContact } from '../../services/contacts';
+
 const RELATIONSHIPS: { value: ConnectionRelationship; label: string }[] = [
   { value: 'parent', label: 'Parent' },
   { value: 'grandparent', label: 'Grandparent' },
@@ -25,15 +27,28 @@ export default function AddPersonScreen() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [relationship, setRelationship] = useState<ConnectionRelationship>('parent');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const canSubmit = name.trim().length > 0 && phone.trim().length >= 6;
+  const canSubmit = name.trim().length > 0 && phone.trim().length >= 6 && !submitting;
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!canSubmit) return;
-    // Next step wires this to the real invite-creation service.
-    const draft = { name: name.trim(), phone: phone.trim(), relationship };
-    console.log('new connection draft', draft);
-    router.back();
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      // New connections start as `pending` until the invite is accepted.
+      await addContact({
+        name: name.trim(),
+        phone: phone.trim(),
+        relationship,
+        status: 'pending',
+      });
+      router.back();
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'Could not send invite');
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -93,33 +108,45 @@ export default function AddPersonScreen() {
           </View>
         </View>
 
-        <View style={styles.actions}>
-          <Pressable onPress={() => router.back()} accessibilityRole="button">
-            {({ pressed }) => (
-              <ThemedView
-                type="backgroundElement"
-                style={[styles.secondaryButton, pressed && styles.pressed]}>
-                <ThemedText type="smallBold">Cancel</ThemedText>
-              </ThemedView>
-            )}
-          </Pressable>
-          <Pressable
-            onPress={handleSubmit}
-            disabled={!canSubmit}
-            accessibilityRole="button"
-            style={styles.primaryWrapper}>
-            {({ pressed }) => (
-              <ThemedView
-                type="backgroundSelected"
-                style={[
-                  styles.primaryButton,
-                  pressed && styles.pressed,
-                  !canSubmit && styles.disabled,
-                ]}>
-                <ThemedText type="smallBold">Send invite</ThemedText>
-              </ThemedView>
-            )}
-          </Pressable>
+        <View style={styles.footer}>
+          {submitError ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {submitError}
+            </ThemedText>
+          ) : null}
+          <View style={styles.actions}>
+            <Pressable
+              onPress={() => router.back()}
+              disabled={submitting}
+              accessibilityRole="button">
+              {({ pressed }) => (
+                <ThemedView
+                  type="backgroundElement"
+                  style={[styles.secondaryButton, pressed && styles.pressed]}>
+                  <ThemedText type="smallBold">Cancel</ThemedText>
+                </ThemedView>
+              )}
+            </Pressable>
+            <Pressable
+              onPress={handleSubmit}
+              disabled={!canSubmit}
+              accessibilityRole="button"
+              style={styles.primaryWrapper}>
+              {({ pressed }) => (
+                <ThemedView
+                  type="backgroundSelected"
+                  style={[
+                    styles.primaryButton,
+                    pressed && styles.pressed,
+                    !canSubmit && styles.disabled,
+                  ]}>
+                  <ThemedText type="smallBold">
+                    {submitting ? 'Sending…' : 'Send invite'}
+                  </ThemedText>
+                </ThemedView>
+              )}
+            </Pressable>
+          </View>
         </View>
       </SafeAreaView>
     </ThemedView>
@@ -158,6 +185,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     borderRadius: Spacing.four,
     borderWidth: 1,
+  },
+  footer: {
+    gap: Spacing.two,
   },
   actions: {
     flexDirection: 'row',

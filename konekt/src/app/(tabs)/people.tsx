@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -8,7 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import type { Connection, ConnectionRelationship, ConnectionStatus } from '@/constants/types';
 
-import { getContacts } from '../../../services/contacts';
+import { getContacts, updateContactStatus } from '../../../services/contacts';
 
 const RELATIONSHIP_LABEL: Record<ConnectionRelationship, string> = {
   parent: 'Parent',
@@ -29,7 +29,15 @@ function initials(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ContactRow({ name, relationship, status }: Connection) {
+function ContactRow({
+  contact,
+  onAccept,
+}: {
+  contact: Connection;
+  onAccept: (id: string) => void;
+}) {
+  const { id, name, relationship, status } = contact;
+
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
       <ThemedView type="backgroundSelected" style={styles.avatar}>
@@ -41,9 +49,22 @@ function ContactRow({ name, relationship, status }: Connection) {
           {RELATIONSHIP_LABEL[relationship] ?? relationship}
         </ThemedText>
       </View>
-      <ThemedText type="small" themeColor="textSecondary">
-        {STATUS_LABEL[status] ?? status}
-      </ThemedText>
+
+      {status === 'pending' ? (
+        <Pressable onPress={() => onAccept(id)} accessibilityRole="button">
+          {({ pressed }) => (
+            <ThemedView
+              type="backgroundSelected"
+              style={[styles.acceptChip, pressed && styles.pressed]}>
+              <ThemedText type="smallBold">Accept</ThemedText>
+            </ThemedView>
+          )}
+        </Pressable>
+      ) : (
+        <ThemedText type="small" themeColor="textSecondary">
+          {STATUS_LABEL[status] ?? status}
+        </ThemedText>
+      )}
     </ThemedView>
   );
 }
@@ -70,6 +91,24 @@ export default function PeopleScreen() {
     }, [load]),
   );
 
+  // Demo shortcut: on a real device the invited person accepts from their own
+  // phone. Here, tapping "Accept" flips the invite pending -> active.
+  const handleAccept = useCallback(
+    async (id: string) => {
+      setContacts(
+        (prev) =>
+          prev?.map((c) => (c.id === id ? { ...c, status: 'active' as ConnectionStatus } : c)) ??
+          prev,
+      );
+      try {
+        await updateContactStatus(id, 'active');
+      } catch {
+        load(); // fall back to the stored state if the write failed
+      }
+    },
+    [load],
+  );
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -86,7 +125,7 @@ export default function PeopleScreen() {
         ) : (
           <View style={styles.list}>
             {contacts.map((contact) => (
-              <ContactRow key={contact.id} {...contact} />
+              <ContactRow key={contact.id} contact={contact} onAccept={handleAccept} />
             ))}
           </View>
         )}
@@ -146,5 +185,13 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     gap: Spacing.half,
+  },
+  acceptChip: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderRadius: Spacing.four,
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });
