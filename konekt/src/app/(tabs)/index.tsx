@@ -5,11 +5,12 @@ import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BellIcon } from '@/components/bell-icon';
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Accents, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
+import { Accents, BottomTabInset, Danger, Radii, Spacing, Surface } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useAuth } from '@/hooks/use-auth';
@@ -128,7 +129,7 @@ export default function TodayScreen() {
             }>
             {({ pressed }) => (
               <View style={[styles.bellWrapper, pressed && styles.pressed]}>
-                <ThemedText style={styles.bell}>🔔</ThemedText>
+                <BellIcon color="#C9CAD2" />
                 {unseenCount > 0 ? (
                   <ThemedView type="backgroundSelected" style={styles.badge}>
                     <ThemedText type="small">{unseenCount > 9 ? '9+' : unseenCount}</ThemedText>
@@ -224,13 +225,9 @@ export default function TodayScreen() {
         {!isEmpty ? (
           <Pressable onPress={confirmEndDay} accessibilityRole="button">
             {({ pressed }) => (
-              <ThemedView
-                type="backgroundElement"
-                style={[styles.endDayButton, pressed && styles.pressed]}>
-                <ThemedText type="smallBold" themeColor="textSecondary">
-                  End day
-                </ThemedText>
-              </ThemedView>
+              <View style={[styles.endDayButton, pressed && styles.pressed]}>
+                <ThemedText type="smallBold">End day</ThemedText>
+              </View>
             )}
           </Pressable>
         ) : null}
@@ -275,9 +272,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.one,
   },
-  bell: {
-    fontSize: 22,
-  },
   badge: {
     position: 'absolute',
     top: -2,
@@ -298,6 +292,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
+    backgroundColor: Danger.fill,
+    borderWidth: 1,
+    borderColor: Danger.border,
     marginTop: Spacing.two,
   },
   safeArea: {

@@ -61,6 +61,12 @@ export const Accents = {
  * edge or it dissolves into the background; the light top border reads as the
  * card catching light, which is what stops a flat rectangle looking cut out.
  */
+/** Destructive actions. Kept out of Accents, which are decorative. */
+export const Danger = {
+  fill: 'rgba(200,42,50,0.82)',
+  border: 'rgba(255,120,124,0.55)',
+} as const;
+
 export const Surface = {
   border: 'rgba(255,255,255,0.14)',
   borderStrong: 'rgba(255,255,255,0.22)',
