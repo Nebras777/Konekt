@@ -15,14 +15,15 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useAuth } from '@/hooks/use-auth';
 import { Spacing } from '@/constants/theme';
 import type { DaySummary } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
-import { getDaySummaryById, saveDaySummary } from '../../../services/firestore';
-import { totalDistanceKm } from '../../../services/sendRecap';
+import { getDaySummaryById } from '../../../services/firestore';
+import { sendRecapToConnections, totalDistanceKm } from '../../../services/sendRecap';
 
 export type RecapScreenContentProps = {
   daySummary: DaySummary;
@@ -34,6 +35,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   const router = useRouter();
   const theme = useTheme();
   const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
+  const { profile } = useAuth();
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
@@ -63,15 +65,35 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   }
 
   async function handleSend() {
+    if (!profile) {
+      setSendError('Sign in before sending a recap.');
+      return;
+    }
     setSending(true);
     setSendError(null);
     try {
-      await saveDaySummary({
-        ...daySummary,
-        places: visiblePlaces,
-        distanceKm: totalDistanceKm(visiblePlaces),
-        highlightNote: note.trim() || undefined,
-      });
+      // Deliver one copy per accepted connection. getInbox() queries by
+      // recipientId, so a recap can only reach one person per document.
+      const { delivered, pending } = await sendRecapToConnections(
+        {
+          ...daySummary,
+          places: visiblePlaces,
+          distanceKm: totalDistanceKm(visiblePlaces),
+          highlightNote: note.trim() || undefined,
+        },
+        profile.id,
+      );
+
+      if (delivered === 0) {
+        setSendError(
+          pending > 0
+            ? `Nobody has accepted your invite yet — ${pending} still pending. They'll get your recaps once they accept.`
+            : 'Invite someone on the People tab first, so there is somebody to send this to.',
+        );
+        setSending(false);
+        return;
+      }
+
       clearDraftRecap(daySummary.id);
       router.replace('/');
     } catch (e) {

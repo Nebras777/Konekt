@@ -1,7 +1,9 @@
 import type { DaySummary, PlaceVisit } from '../src/constants/types';
 import { DEMO_USERS } from '../src/constants/types';
 import { generateDaySummary } from './aiSummary';
+import { getContacts } from './contacts';
 import { getCurrentProfile } from './currentProfile';
+import { saveDaySummary } from './firestore';
 import { fillMissingPhotos } from './unsplash';
 
 type BuildRecapOptions = {
@@ -77,4 +79,37 @@ export async function buildDayRecap(
     distanceKm: totalDistanceKm(placesWithPhotos),
     createdAt,
   };
+}
+
+/**
+ * Deliver a recap to everyone the sender is actively connected to.
+ *
+ * One document per recipient, because getInbox() queries by recipientId — a
+ * single document can only be addressed to one person. Each copy gets its own
+ * id so they don't overwrite each other.
+ *
+ * Only `active` connections receive anything: a pending invite hasn't been
+ * accepted, and sending to it would push a day's movements at someone who
+ * never agreed to see them. Returns how many copies were delivered, so the
+ * caller can tell the user when the answer is zero.
+ */
+export async function sendRecapToConnections(
+  summary: DaySummary,
+  ownerId: string,
+): Promise<{ delivered: number; pending: number }> {
+  const contacts = await getContacts(ownerId);
+  const recipients = contacts.filter((c) => c.status === 'active' && c.profileId);
+  const pending = contacts.filter((c) => c.status === 'pending').length;
+
+  await Promise.all(
+    recipients.map((contact) =>
+      saveDaySummary({
+        ...summary,
+        id: `${summary.id}__${contact.profileId}`,
+        recipientId: contact.profileId as string,
+      }),
+    ),
+  );
+
+  return { delivered: recipients.length, pending };
 }
