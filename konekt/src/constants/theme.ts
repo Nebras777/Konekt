@@ -12,12 +12,11 @@ export const Colors = {
     /** White on the purple gradient and on the dark cards alike. */
     text: '#FFFFFF',
     /**
-     * Transparent on purpose. The gradient is drawn once behind the whole app in
-     * _layout, and every screen's root ThemedView sits on top of it — painting a
-     * solid colour here would cover it, and drawing a gradient per screen makes
-     * visible seams when you move between tabs.
+     * The gradient's starting colour, used as the base everywhere. Screens opt
+     * into the gradient itself with <ThemedView gradient>; this is what shows
+     * if the gradient can't draw, so it is never grey.
      */
-    background: 'transparent',
+    background: '#900CFF',
     /** Cards: dark grey, so they read as raised against the vivid purple. */
     backgroundElement: '#26262E',
     /** Selected chips and pressed states — a lift from the card, not a new colour. */

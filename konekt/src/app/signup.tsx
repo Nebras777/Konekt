@@ -39,7 +39,7 @@ export default function SignUpScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <Stack.Screen options={{ title: 'Create profile', presentation: 'modal' }} />
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.form}>

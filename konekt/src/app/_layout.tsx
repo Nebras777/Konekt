@@ -1,13 +1,11 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { ThemedView } from '@/components/themed-view';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
-import { BackgroundGradient, Colors } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 
 /**
  * Navigation paints its own screen backgrounds, which would sit over the
@@ -74,25 +72,11 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <ThemeProvider value={navigationTheme}>
-      {/* Drawn once, behind everything. Screens are transparent and sit on top. */}
-      <View style={styles.root}>
-        <LinearGradient
-          colors={[...BackgroundGradient]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <AnimatedSplashOverlay />
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
-      </View>
+      <AnimatedSplashOverlay />
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-});

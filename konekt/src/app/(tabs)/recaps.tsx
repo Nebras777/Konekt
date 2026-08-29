@@ -142,7 +142,7 @@ export default function RecapsScreen() {
   const visible = showSavedOnly ? savedVisible : (summaries ?? []);
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Recaps</ThemedText>
 

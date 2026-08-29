@@ -59,7 +59,7 @@ export default function AddPersonScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <Stack.Screen options={{ title: 'Add person', presentation: 'modal' }} />
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.form}>

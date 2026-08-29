@@ -92,7 +92,7 @@ export default function MemoryLaneScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Memory Lane</ThemedText>
 

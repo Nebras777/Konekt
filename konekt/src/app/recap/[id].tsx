@@ -157,7 +157,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.content}>
           <ThemedText type="subtitle">Today&apos;s Recap</ThemedText>

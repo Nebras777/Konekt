@@ -44,7 +44,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <Stack.Screen options={{ title: 'Log in', presentation: 'modal' }} />
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="small" themeColor="textSecondary">

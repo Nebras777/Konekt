@@ -72,7 +72,7 @@ export default function BuildingScreen() {
   }, [router, attempt]);
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="subtitle">Building your recap</ThemedText>
 

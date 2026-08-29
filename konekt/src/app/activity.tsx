@@ -53,7 +53,7 @@ export default function ActivityScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {unseen.length > 0 ? (
           <Pressable onPress={markAllRead} accessibilityRole="button" style={styles.markAll}>

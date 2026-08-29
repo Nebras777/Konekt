@@ -224,7 +224,7 @@ export default function PeopleScreen() {
     : notYetConnected;
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">People</ThemedText>
 
