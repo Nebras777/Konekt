@@ -50,3 +50,18 @@ export async function getInbox(recipientId: string): Promise<DaySummary[]> {
     .map((d) => ({ ...(d.data() as DaySummary), id: d.id }))
     .sort((a, b) => b.createdAt - a.createdAt);
 }
+
+/**
+ * Get every day summary a given user has sent, newest first — their own
+ * Memory Lane archive.
+ */
+export async function getMyDays(userId: string): Promise<DaySummary[]> {
+  const q = query(
+    collection(db, COLLECTION),
+    where('userId', '==', userId),
+  );
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ ...(d.data() as DaySummary), id: d.id }))
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
