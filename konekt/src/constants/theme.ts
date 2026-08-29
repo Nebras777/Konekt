@@ -9,14 +9,31 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#16283A',
-    background: '#DAEAF7',
-    backgroundElement: '#FFFFFF',
-    backgroundSelected: '#F5F9FC',
-    textSecondary: '#63798C',
-    primary: '#16283A',
+    /** White on the purple gradient and on the dark cards alike. */
+    text: '#FFFFFF',
+    /**
+     * Solid fallback for the gradient, set to its starting colour so nothing
+     * flashes a different shade before the gradient paints.
+     */
+    background: '#900CFF',
+    /** Cards: dark grey, so they read as raised against the vivid purple. */
+    backgroundElement: '#26262E',
+    /** Selected chips and pressed states — a lift from the card, not a new colour. */
+    backgroundSelected: '#3A3A45',
+    /** Muted white. Grey secondary text would disappear on both surfaces. */
+    textSecondary: '#B9BAC4',
+    /** Accent for switches, picked from the gradient's bright end. */
+    primary: '#CC1BFF',
   },
 } as const;
+
+/**
+ * Background gradient, vivid purple into magenta.
+ *
+ * Kept here so every screen draws the same one — a gradient defined per screen
+ * drifts, and the seams show when you move between tabs.
+ */
+export const BackgroundGradient = ['#900CFF', '#CC1BFF'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 

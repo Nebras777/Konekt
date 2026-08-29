@@ -1,5 +1,6 @@
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { ThemedView } from '@/components/themed-view';
@@ -17,7 +18,11 @@ function RootNavigator() {
   }
 
   return (
-    <Stack>
+    <>
+      {/* Light icons: the background is now a vivid purple, and the default
+          dark status bar icons disappear against it. */}
+      <StatusBar style="light" />
+      <Stack>
       <Stack.Protected guard={!!profile}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="recap/[id]" options={{ title: 'Recap' }} />
@@ -40,8 +45,9 @@ function RootNavigator() {
         name="signup"
         options={{ title: 'Create profile', presentation: 'modal' }}
       />
-      <Stack.Screen name="login" options={{ title: 'Log in', presentation: 'modal' }} />
-    </Stack>
+        <Stack.Screen name="login" options={{ title: 'Log in', presentation: 'modal' }} />
+      </Stack>
+    </>
   );
 }
 
