@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -14,6 +14,7 @@ import type {
   Profile,
 } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 
 import {
   getContacts,
@@ -109,11 +110,13 @@ function ContactRow({
 
 export default function PeopleScreen() {
   const { profile } = useAuth();
+  const theme = useTheme();
   // null = still loading, [] = loaded but empty
   const [contacts, setContacts] = useState<Connection[] | null>(null);
   const [incoming, setIncoming] = useState<Connection[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [inviting, setInviting] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -209,9 +212,14 @@ export default function PeopleScreen() {
 
   // Everyone signed up, minus yourself and anyone you've already invited.
   const alreadyConnected = new Set((contacts ?? []).map((c) => c.profileId).filter(Boolean));
-  const invitable = profiles.filter(
+  const notYetConnected = profiles.filter(
     (p) => p.id !== profile?.id && !alreadyConnected.has(p.id),
   );
+
+  const term = search.trim().toLowerCase();
+  const invitable = term
+    ? notYetConnected.filter((p) => p.name.toLowerCase().includes(term))
+    : notYetConnected;
 
   return (
     <ThemedView style={styles.container}>
@@ -290,9 +298,30 @@ export default function PeopleScreen() {
           </View>
         )}
 
-        {profile && invitable.length > 0 ? (
+        {profile && notYetConnected.length > 0 ? (
           <View style={styles.list}>
             <ThemedText type="smallBold">On Konekt</ThemedText>
+
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search people to invite"
+              placeholderTextColor={theme.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+              clearButtonMode="while-editing"
+              style={[
+                styles.search,
+                { color: theme.text, borderColor: theme.backgroundSelected },
+              ]}
+            />
+
+            {invitable.length === 0 ? (
+              <ThemedText type="small" themeColor="textSecondary">
+                Nobody matches “{search.trim()}”.
+              </ThemedText>
+            ) : null}
+
             {invitable.map((person) => (
               <ThemedView key={person.id} type="backgroundElement" style={styles.inviteRow}>
                 <ThemedText type="smallBold">{person.name}</ThemedText>
@@ -344,6 +373,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  search: {
+    borderWidth: 1,
+    borderRadius: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    fontSize: 15,
   },
   inviteRow: {
     flexDirection: 'row',
