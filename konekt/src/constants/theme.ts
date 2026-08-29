@@ -9,22 +9,22 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Deep indigo. Reads as the dark end of the same periwinkle rather than
-     *  as an unrelated black dropped on top. */
-    text: '#1B2A5E',
+    /** Deep ink with a violet cast — reads as warm next to the peach, where a
+     *  neutral black would look sooty. */
+    text: '#241F3D',
     /** Base colour, the gradient's first stop, so nothing flashes white. */
-    background: '#B9D5FE',
+    background: '#FFE3D3',
     /**
-     * Cards are white, slightly translucent, so the sky shows faintly through.
-     * Cards high on a screen pick up powder blue and lower ones periwinkle,
-     * which varies a list without giving cards different colours.
+     * Cards are white glass. On a light ground the gradient shows through just
+     * enough that cards higher up a screen pick up peach and lower ones
+     * periwinkle, so repeated cards vary without being given different colours.
      */
-    backgroundElement: 'rgba(255,255,255,0.88)',
-    /** Selected and pressed: solid white, the brightest thing available. */
-    backgroundSelected: '#FFFFFF',
-    textSecondary: 'rgba(27,42,94,0.62)',
-    /** Accent for switches: coral, the complement of sky blue. */
-    primary: '#FF7A59',
+    backgroundElement: 'rgba(255,255,255,0.76)',
+    /** Selected and pressed: the same glass, brought closer to solid. */
+    backgroundSelected: 'rgba(255,255,255,0.96)',
+    textSecondary: 'rgba(36,31,61,0.60)',
+    /** Accent for switches. */
+    primary: '#7C5CFF',
   },
 } as const;
 
@@ -32,29 +32,28 @@ export const Colors = {
 export const TabBarSurface = '#FFFFFF';
 
 /**
- * Background gradient: powder blue into periwinkle.
+ * Background gradient: peach into pink into periwinkle.
  *
- * Softer and more violet-leaning than a cyan sky — quiet enough to sit behind
- * content all day without tiring, and pale enough at the top that dark text
- * needs no help, which is what lets cards stay light instead of heavy.
+ * A sunset, which is when someone would actually sit down and send their day.
+ * Light on purpose — the two dark schemes before this needed heavy cards to
+ * stay legible, and heavy cards are what made the app feel blocky.
  */
-export const BackgroundGradient = ['#B9D5FE', '#9CB6F9', '#8091EF'] as const;
+export const BackgroundGradient = ['#FFE3D3', '#FFD6E7', '#E4E0FF'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
 /**
  * Playful accents, used to give repeated elements their own identity — stat
- * tiles, avatars, stop markers. Chosen to sit on the dark grey cards rather
- * than on the purple, which is where they all appear.
+ * tiles, avatars, stop markers. Saturated on purpose: on a pale ground, pastel
+ * accents disappear.
  */
 export const Accents = {
-  /** Warm, to complement a cool ground — on sky blue these advance where
-   *  another blue would disappear. */
-  coral: '#FF7A59',
-  sunshine: '#FFC24D',
-  mint: '#2ED3A7',
-  violet: '#7C6BFF',
-  pink: '#FF6FA5',
+  /** Saturated and candy-bright: on a pale ground, pastels would vanish. */
+  tangerine: '#FF7A45',
+  bubblegum: '#FF4D94',
+  grape: '#7C5CFF',
+  teal: '#00B8A9',
+  sunshine: '#FFB020',
 } as const;
 
 /**
@@ -64,20 +63,19 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: '#FF4D4D',
-  border: 'rgba(255,77,77,0.45)',
-  /** Text on the red fill. The theme's ink is dark and unreadable on it. */
+  fill: '#E5484D',
+  border: 'rgba(229,72,77,0.35)',
+  /** Text on the red fill. The theme's ink is dark, which would be unreadable. */
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  /** A soft navy hairline. The heavy ink outline of the previous scheme fought
-   *  the softness of this one — airy backgrounds want thin edges. */
-  border: 'rgba(27,42,94,0.10)',
-  /** A white top edge, so a card looks lit from above rather than cut out. */
-  borderStrong: 'rgba(255,255,255,0.95)',
-  /** Blue-tinted, so shadows sit in the sky rather than greying it. */
-  shadow: 'rgba(50,70,150,0.18)',
+  /** A soft ink edge: on a light ground a white border would be invisible. */
+  border: 'rgba(36,31,61,0.10)',
+  borderStrong: 'rgba(255,255,255,0.85)',
+  /** Tinted rather than black, so shadows sit in the palette. */
+  shadow: 'rgba(120,80,140,0.22)',
+  /** Hairline. A pale ground wants thin edges — a heavy outline fights it. */
   borderWidth: 1,
 } as const;
 
@@ -95,18 +93,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const SURFACE_ALPHAS = [0.82, 0.90, 0.86, 0.94] as const;
+const SURFACE_ALPHAS = [0.72, 0.82, 0.76, 0.88] as const;
 
 export function surfaceFor(index: number): string {
   return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
 }
 
 export const AccentList = [
-  Accents.coral,
+  Accents.tangerine,
+  Accents.bubblegum,
+  Accents.grape,
+  Accents.teal,
   Accents.sunshine,
-  Accents.mint,
-  Accents.violet,
-  Accents.pink,
 ] as const;
 
 /**

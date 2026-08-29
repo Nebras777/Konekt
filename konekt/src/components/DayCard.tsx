@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     // The accent lives on an edge rather than the fill, so the card stays
     // readable while still being identifiably "this stop".
-    borderLeftWidth: 5,
+    borderLeftWidth: 4,
     // A translucent card needs a defined edge or it dissolves into the
     // gradient behind it.
     borderTopWidth: Surface.borderWidth,
