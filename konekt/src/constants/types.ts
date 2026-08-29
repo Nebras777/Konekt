@@ -50,6 +50,13 @@ export type DaySummary = {
    * written to this document, so there is nothing to reveal.
    */
   locationHidden?: boolean;
+  /**
+   * The sender's own full record of the day, kept alongside the per-recipient
+   * copies. It is addressed to nobody, so it never lands in an inbox, and it is
+   * never stripped — what you choose not to share with someone else shouldn't
+   * disappear from your own history.
+   */
+  isSenderCopy?: boolean;
 };
 
 export const DEMO_USERS = {

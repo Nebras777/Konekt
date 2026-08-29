@@ -112,8 +112,19 @@ export async function sendRecapToConnections(
   const recipients = contacts.filter((c) => c.status === 'active' && c.profileId);
   const pending = contacts.filter((c) => c.status === 'pending').length;
 
-  await Promise.all(
-    recipients.map((contact) => {
+  // The sender's own record: complete, addressed to nobody, written once
+  // regardless of how many people it goes to. Without this, Memory Lane shows
+  // one entry per recipient — and if every recipient had location withheld, the
+  // sender's own history would have no map at all.
+  const senderCopy: Promise<unknown> = saveDaySummary({
+    ...summary,
+    recipientId: '',
+    isSenderCopy: true,
+  });
+
+  await Promise.all([
+    senderCopy,
+    ...recipients.map((contact) => {
       const group = contact.group ?? 'other';
       const shareLocation =
         group === 'family'
@@ -143,7 +154,7 @@ export async function sendRecapToConnections(
         recipientId: contact.profileId as string,
       });
     }),
-  );
+  ]);
 
   return { delivered: recipients.length, pending };
 }

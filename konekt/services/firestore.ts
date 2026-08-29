@@ -61,7 +61,47 @@ export async function getMyDays(userId: string): Promise<DaySummary[]> {
     where('userId', '==', userId),
   );
   const snap = await getDocs(q);
-  return snap.docs
-    .map((d) => ({ ...(d.data() as DaySummary), id: d.id }))
-    .sort((a, b) => b.createdAt - a.createdAt);
+  const all = snap.docs.map((d) => ({ ...(d.data() as DaySummary), id: d.id }));
+
+  return dedupeToOnePerDay(all).sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/**
+ * Sending fans a recap out to one document per recipient, so a day sent to
+ * three people is three documents. Memory Lane is the sender's own history and
+ * should show that day once, with everything in it.
+ *
+ * Recaps sent from now on include an unstripped sender copy, which is simply
+ * the right answer. Recaps sent before that exist only as per-recipient copies,
+ * so those are grouped by the id they share and the richest one is kept — a
+ * copy that still has coordinates beats one whose location was withheld.
+ */
+function dedupeToOnePerDay(summaries: DaySummary[]): DaySummary[] {
+  const senderCopies = summaries.filter((s) => s.isSenderCopy);
+  const senderCopyIds = new Set(senderCopies.map((s) => s.id));
+
+  const byDay = new Map<string, DaySummary>();
+  for (const summary of summaries) {
+    if (summary.isSenderCopy) {
+      continue;
+    }
+    // Recipient copies are the sender copy's id plus "__<recipient>".
+    const baseId = summary.id.split('__')[0];
+    if (senderCopyIds.has(baseId)) {
+      continue; // a full copy of this day already exists
+    }
+
+    const existing = byDay.get(baseId);
+    if (!existing || locatedCount(summary) > locatedCount(existing)) {
+      byDay.set(baseId, summary);
+    }
+  }
+
+  return [...senderCopies, ...byDay.values()];
+}
+
+function locatedCount(summary: DaySummary): number {
+  return summary.places.filter(
+    (p) => typeof p.lat === 'number' && typeof p.lng === 'number',
+  ).length;
 }
