@@ -144,9 +144,9 @@ export default function TodayScreen() {
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
-            <Stat label="km" value={stats.km} accent={Accents.mint} tilt="-1.5deg" />
-            <Stat label="stops" value={stats.stops} accent={Accents.amber} tilt="1deg" />
-            <Stat label="photos" value={stats.photos} accent={Accents.sky} tilt="-0.8deg" />
+            <Stat label="km" value={stats.km} accent={Accents.teal} tilt="-1.5deg" />
+            <Stat label="stops" value={stats.stops} accent={Accents.tangerine} tilt="1deg" />
+            <Stat label="photos" value={stats.photos} accent={Accents.grape} tilt="-0.8deg" />
           </View>
 
           {isEmpty ? (
@@ -228,7 +228,9 @@ export default function TodayScreen() {
           <Pressable onPress={confirmEndDay} accessibilityRole="button">
             {({ pressed }) => (
               <View style={[styles.endDayButton, pressed && styles.pressed]}>
-                <ThemedText type="smallBold">End day</ThemedText>
+                <ThemedText type="smallBold" style={{ color: Danger.text }}>
+                  End day
+                </ThemedText>
               </View>
             )}
           </Pressable>

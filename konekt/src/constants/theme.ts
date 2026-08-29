@@ -9,37 +9,36 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Warm off-white rather than pure white — softer on a dark ground. */
-    text: '#F3F8F9',
-    /** Base colour, the gradient's darkest end, so nothing flashes bright. */
-    background: '#0F2A3F',
+    /** Deep ink with a violet cast — reads as warm next to the peach, where a
+     *  neutral black would look sooty. */
+    text: '#241F3D',
+    /** Base colour, the gradient's first stop, so nothing flashes white. */
+    background: '#FFE3D3',
     /**
-     * Cards are light glass, not dark blocks. On a mid-tone background a
-     * lighter surface reads as raised, where a darker one reads as a hole —
-     * and letting the gradient through means cards higher up a screen pick up
-     * more blue and lower ones more teal, so repeated cards vary on their own.
+     * Cards are white glass. On a light ground the gradient shows through just
+     * enough that cards higher up a screen pick up peach and lower ones
+     * periwinkle, so repeated cards vary without being given different colours.
      */
-    backgroundElement: 'rgba(255,255,255,0.09)',
-    /** Selected and pressed: the same glass, lifted. */
-    backgroundSelected: 'rgba(255,255,255,0.18)',
-    /** Muted white rather than grey, which would go murky over the gradient. */
-    textSecondary: 'rgba(243,248,249,0.68)',
-    /** Accent for switches: the warmest thing in the palette. */
-    primary: '#6EE7B7',
+    backgroundElement: 'rgba(255,255,255,0.76)',
+    /** Selected and pressed: the same glass, brought closer to solid. */
+    backgroundSelected: 'rgba(255,255,255,0.96)',
+    textSecondary: 'rgba(36,31,61,0.60)',
+    /** Accent for switches. */
+    primary: '#7C5CFF',
   },
 } as const;
 
+/** Solid surface for the tab bar. Native bars render alpha unreliably. */
+export const TabBarSurface = '#FFFFFF';
+
 /**
- * Background gradient: deep sea blue easing into teal.
+ * Background gradient: peach into pink into periwinkle.
  *
- * Chosen for what the app is — someone telling their family about their day at
- * the end of it. Calm and evening-toned, and dark enough that white text sits
- * on it without glare, which the previous vivid purple couldn't manage.
- *
- * Kept here so every screen draws the same one; a gradient defined per screen
- * drifts and shows seams between tabs.
+ * A sunset, which is when someone would actually sit down and send their day.
+ * Light on purpose — the two dark schemes before this needed heavy cards to
+ * stay legible, and heavy cards are what made the app feel blocky.
  */
-export const BackgroundGradient = ['#0F2A3F', '#16536A', '#1B7E74'] as const;
+export const BackgroundGradient = ['#FFE3D3', '#FFD6E7', '#E4E0FF'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -49,13 +48,12 @@ export type ThemeColor = keyof typeof Colors.light;
  * than on the purple, which is where they all appear.
  */
 export const Accents = {
-  /** Warm on purpose: against a cool blue-teal ground, warm accents advance
-   *  and cool ones disappear into the background. */
-  amber: '#FFC15E',
-  coral: '#FF8A7A',
-  mint: '#6EE7B7',
-  sky: '#7DD3FC',
-  rose: '#F9A8D4',
+  /** Saturated and candy-bright: on a pale ground, pastels would vanish. */
+  tangerine: '#FF7A45',
+  bubblegum: '#FF4D94',
+  grape: '#7C5CFF',
+  teal: '#00B8A9',
+  sunshine: '#FFB020',
 } as const;
 
 /**
@@ -65,14 +63,18 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: 'rgba(214,69,74,0.88)',
-  border: 'rgba(255,138,122,0.55)',
+  fill: '#E5484D',
+  border: 'rgba(229,72,77,0.35)',
+  /** Text on the red fill. The theme's ink is dark, which would be unreadable. */
+  text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  border: 'rgba(255,255,255,0.16)',
-  borderStrong: 'rgba(255,255,255,0.30)',
-  shadow: 'rgba(6,20,30,0.45)',
+  /** A soft ink edge: on a light ground a white border would be invisible. */
+  border: 'rgba(36,31,61,0.10)',
+  borderStrong: 'rgba(255,255,255,0.85)',
+  /** Tinted rather than black, so shadows sit in the palette. */
+  shadow: 'rgba(120,80,140,0.22)',
 } as const;
 
 /** Corner radii, larger and softer than the old uniform 16. */
@@ -89,18 +91,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const SURFACE_ALPHAS = [0.08, 0.11, 0.09, 0.13] as const;
+const SURFACE_ALPHAS = [0.72, 0.82, 0.76, 0.88] as const;
 
 export function surfaceFor(index: number): string {
   return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
 }
 
 export const AccentList = [
-  Accents.amber,
-  Accents.coral,
-  Accents.mint,
-  Accents.sky,
-  Accents.rose,
+  Accents.tangerine,
+  Accents.bubblegum,
+  Accents.grape,
+  Accents.teal,
+  Accents.sunshine,
 ] as const;
 
 /**

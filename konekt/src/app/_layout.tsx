@@ -37,9 +37,8 @@ function RootNavigator() {
 
   return (
     <>
-      {/* Light icons: the background is now a vivid purple, and the default
-          dark status bar icons disappear against it. */}
-      <StatusBar style="light" />
+      {/* Dark icons: the background is light now, and white icons vanish on it. */}
+      <StatusBar style="dark" />
       <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Protected guard={!!profile}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
