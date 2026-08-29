@@ -9,37 +9,32 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** The navy the wordmark ends on. Text and logo are then the same colour,
-     *  rather than the logo sitting on a palette it has nothing to do with. */
-    text: '#1B2447',
-    /** Base colour, the gradient's first stop, so nothing flashes white. */
-    background: '#F0F4FE',
-    /**
-     * Cards are white and slightly translucent, so the wash shows faintly
-     * through — cards high on a screen pick up less tint and lower ones more,
-     * varying a list without giving cards different colours.
-     */
-    backgroundElement: 'rgba(255,255,255,0.90)',
-    /** Selected and pressed: solid white. */
-    backgroundSelected: '#FFFFFF',
-    textSecondary: 'rgba(27,36,71,0.60)',
-    /** The mid-blue from the middle of the wordmark. */
-    primary: '#4A5FA8',
+    text: '#25232B',
+    background: '#F8F7FC',
+    /** Surface: cards are solid white against the near-white ground. */
+    backgroundElement: '#FFFFFF',
+    /** Lavender, for selected chips and pressed states. */
+    backgroundSelected: '#E9E6FF',
+    textSecondary: '#777380',
+    primary: '#7C6EE6',
   },
 } as const;
+
+/** The darker primary, for pressed states and emphasis. */
+export const PrimaryDark = '#5B4BC4';
 
 /** Solid surface for the tab bar. Native bars render alpha unreliably. */
 export const TabBarSurface = '#FFFFFF';
 
 /**
- * Background gradient: pale tints of the logo's own periwinkle.
+ * Background gradient: the background colour easing into lavender.
  *
- * The logo runs light periwinkle to deep navy. Using that gradient directly
- * would mean a dark ground and white text; using tints of its light end keeps
- * the brand's colour while leaving the navy free for text — so the wordmark
- * reads as part of the app rather than pasted onto it.
+ * Kept very shallow. With a near-white ground and white cards, a strong
+ * gradient would swamp the small amount of contrast holding the two apart —
+ * this reads as a tint rather than a wash. Set all three stops to the
+ * background colour for a flat background instead.
  */
-export const BackgroundGradient = ['#F0F4FE', '#DEE7FB', '#C6D4F4'] as const;
+export const BackgroundGradient = ['#F8F7FC', '#F1EEFB', '#E9E6FF'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -49,15 +44,11 @@ export type ThemeColor = keyof typeof Colors.light;
  * accents disappear.
  */
 export const Accents = {
-  /** Two taken straight from the logo's gradient... */
-  periwinkle: '#7C9BE8',
-  indigo: '#4A5FA8',
-  /** ...and three warm ones, because five shades of the same blue would make
-   *  stat tiles and avatars indistinguishable, and warm colours advance
-   *  against a cool ground where another blue would sink into it. */
-  coral: '#FF8A6B',
-  gold: '#FFC24D',
-  teal: '#2FBFAE',
+  violet: '#7C6EE6',
+  green: '#69B58A',
+  amber: '#E8A84C',
+  pink: '#D875A5',
+  indigo: '#5B4BC4',
 } as const;
 
 /**
@@ -67,19 +58,24 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: '#E5484D',
-  border: 'rgba(229,72,77,0.35)',
-  /** Text on the red fill. The theme's ink is dark, which would be unreadable. */
+  /** No red was specified in the palette, so this is chosen to sit beside the
+   *  violet rather than clash with it — slightly rose, not fire-engine. */
+  fill: '#E05260',
+  border: 'rgba(224,82,96,0.35)',
+  /** Text on the red fill. The theme's text colour is dark and unreadable on it. */
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  /** A hairline in the brand navy rather than a neutral grey. */
-  border: 'rgba(27,36,71,0.10)',
-  borderStrong: 'rgba(255,255,255,0.95)',
-  /** Blue-tinted, so shadows sit in the palette rather than greying it. */
-  shadow: 'rgba(40,60,120,0.16)',
-  /** Hairline. A pale ground wants thin edges — a heavy outline fights it. */
+  /**
+   * White cards on a near-white ground have almost no contrast of their own,
+   * so the edge is what separates them. Tinted with the text colour rather
+   * than pure grey.
+   */
+  border: 'rgba(37,35,43,0.09)',
+  borderStrong: 'rgba(37,35,43,0.14)',
+  /** Violet-tinted, so shadows sit in the palette rather than greying it. */
+  shadow: 'rgba(91,75,196,0.16)',
   borderWidth: 1,
 } as const;
 
@@ -97,17 +93,17 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const SURFACE_ALPHAS = [0.86, 0.94, 0.90, 0.98] as const;
+const CARD_TINTS = ['#FFFFFF', '#FDFCFF', '#FBFAFF', '#FEFDFF'] as const;
 
 export function surfaceFor(index: number): string {
-  return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
+  return CARD_TINTS[index % CARD_TINTS.length];
 }
 
 export const AccentList = [
-  Accents.periwinkle,
-  Accents.coral,
-  Accents.gold,
-  Accents.teal,
+  Accents.violet,
+  Accents.green,
+  Accents.amber,
+  Accents.pink,
   Accents.indigo,
 ] as const;
 
