@@ -138,7 +138,7 @@ export default function TodayScreen() {
             }>
             {({ pressed }) => (
               <View style={[styles.bellWrapper, pressed && styles.pressed]}>
-                <BellIcon color={theme.textSecondary} />
+                <BellIcon color="#00E5FF" />
                 {unseenCount > 0 ? (
                   <ThemedView type="backgroundSelected" style={styles.badge}>
                     <ThemedText type="small">{unseenCount > 9 ? '9+' : unseenCount}</ThemedText>
@@ -335,8 +335,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: Radii.lg,
     borderWidth: Surface.borderWidth,
-    borderColor: Surface.border,
-    borderTopColor: Surface.borderStrong,
+    borderColor: Surface.borderStrong,
+    borderTopColor: 'rgba(255,255,255,0.55)',
     paddingVertical: Spacing.three,
     gap: Spacing.half,
   },

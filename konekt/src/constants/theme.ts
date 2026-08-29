@@ -15,10 +15,10 @@ export const Colors = {
     /** The gradient's darkest stop. Cards sit above this, never below it. */
     background: '#08091A',
     /** A white film over the indigo, which picks up the hue beneath. */
-    backgroundElement: 'rgba(255,255,255,0.065)',
+    backgroundElement: 'rgba(255,255,255,0.11)',
     /** Selected and pressed lift toward the brand periwinkle. */
-    backgroundSelected: 'rgba(0,229,255,0.20)',
-    textSecondary: 'rgba(242,246,255,0.58)',
+    backgroundSelected: 'rgba(0,229,255,0.28)',
+    textSecondary: 'rgba(242,246,255,0.76)',
     /**
      * Amber, and deliberately the only warm thing in the palette. A cool ground
      * with a single warm accent is what makes the accent read as important —
@@ -32,7 +32,7 @@ export const Colors = {
 export const PrimaryText = '#04060F';
 export const PrimaryDark = '#00B8CC';
 
-export const TabBarSurface = '#101230';
+export const TabBarSurface = '#181B40';
 
 /**
  * Background gradient: indigo night, lighter at the top.
@@ -83,11 +83,11 @@ export const Danger = {
 } as const;
 
 export const Surface = {
-  border: 'rgba(255,255,255,0.09)',
+  border: 'rgba(255,255,255,0.16)',
   /** Brighter on top: a lit upper edge is what makes a flat panel look raised.
    *  Stronger here than on a lighter ground — a faint edge disappears entirely
    *  against near-black. */
-  borderStrong: 'rgba(255,255,255,0.26)',
+  borderStrong: 'rgba(255,255,255,0.40)',
   shadow: 'rgba(0,0,0,0.5)',
   /** An amber cast under the primary button, so it appears to glow. */
   glow: 'rgba(0,229,255,0.55)',
@@ -108,7 +108,7 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.085)', 'rgba(255,255,255,0.07)', 'rgba(255,255,255,0.10)'] as const;
+const CARD_TINTS = ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.135)', 'rgba(255,255,255,0.115)', 'rgba(255,255,255,0.155)'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];
