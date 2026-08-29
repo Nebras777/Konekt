@@ -17,12 +17,13 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/hooks/use-auth';
 import { Spacing } from '@/constants/theme';
-import type { DaySummary } from '@/constants/types';
+import type { ConnectionGroup, DaySummary } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
 import { getContacts } from '../../../services/contacts';
+import { getPrivacySettings } from '../../../services/privacySettings';
 import { getDaySummaryById } from '../../../services/firestore';
 import { sendRecapToConnections, totalDistanceKm } from '../../../services/sendRecap';
 
@@ -30,6 +31,12 @@ export type RecapScreenContentProps = {
   daySummary: DaySummary;
   /** True once this recap is already saved (e.g. viewed from someone's inbox) — hides editing/send. */
   readOnly?: boolean;
+};
+
+const GROUP_LABEL: Record<ConnectionGroup, string> = {
+  family: 'Family',
+  friends: 'Friends',
+  other: 'Other',
 };
 
 export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreenContentProps) {
@@ -44,17 +51,33 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
 
   // Who this will actually go to. recipientId on the draft is a profile id (or
   // the demo fallback), so showing it raw put "family_demo" on the button.
-  const [recipients, setRecipients] = useState<string[]>([]);
+  const [recipients, setRecipients] = useState<
+    { name: string; group: ConnectionGroup; willSeeLocation: boolean }[]
+  >([]);
   useEffect(() => {
     if (!profile || readOnly) {
       return;
     }
     let cancelled = false;
-    getContacts(profile.id)
-      .then((contacts) => {
+    Promise.all([getContacts(profile.id), getPrivacySettings(profile.id)])
+      .then(([contacts, privacy]) => {
         if (cancelled) return;
         setRecipients(
-          contacts.filter((c) => c.status === 'active' && c.profileId).map((c) => c.name),
+          contacts
+            .filter((c) => c.status === 'active' && c.profileId)
+            .map((c) => {
+              const group = c.group ?? 'other';
+              return {
+                name: c.name,
+                group,
+                willSeeLocation:
+                  group === 'family'
+                    ? privacy.shareLocationWithFamily
+                    : group === 'friends'
+                      ? privacy.shareLocationWithFriends
+                      : privacy.shareLocationWithOthers,
+              };
+            }),
         );
       })
       .catch(() => {
@@ -69,7 +92,7 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
     recipients.length === 0
       ? 'Send'
       : recipients.length === 1
-        ? `Send to ${recipients[0]}`
+        ? `Send to ${recipients[0].name}`
         : `Send to ${recipients.length} people`;
 
   function toggleExcluded(index: number) {
@@ -192,6 +215,31 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
 
           {!readOnly ? (
             <View style={styles.actionsSection}>
+              {recipients.length > 0 ? (
+                <ThemedView type="backgroundElement" style={styles.previewCard}>
+                  <ThemedText type="smallBold">Who gets what</ThemedText>
+                  {recipients.map((r) => (
+                    <View key={r.name} style={styles.previewRow}>
+                      <ThemedText type="small" style={styles.previewName}>
+                        {r.name}{' '}
+                        <ThemedText type="small" themeColor="textSecondary">
+                          ({GROUP_LABEL[r.group]})
+                        </ThemedText>
+                      </ThemedText>
+                      <ThemedText type="small" themeColor="textSecondary">
+                        {r.willSeeLocation ? 'map + photos' : 'photos only'}
+                      </ThemedText>
+                    </View>
+                  ))}
+                  {recipients.some((r) => !r.willSeeLocation) ? (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      Location is left out for some people, based on your Privacy settings.
+                      Their copy is sent without it.
+                    </ThemedText>
+                  ) : null}
+                </ThemedView>
+              ) : null}
+
               {sendError ? (
                 <ThemedText themeColor="textSecondary">{sendError}</ThemedText>
               ) : null}
@@ -363,6 +411,20 @@ const styles = StyleSheet.create({
   actionsSection: {
     gap: Spacing.two,
     marginTop: Spacing.two,
+  },
+  previewCard: {
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.two,
+  },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  previewName: {
+    flexShrink: 1,
   },
   actionsRow: {
     flexDirection: 'row',
