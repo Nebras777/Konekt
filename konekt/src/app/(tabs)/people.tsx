@@ -1,26 +1,35 @@
-import { StyleSheet, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
+import type { Connection, ConnectionRelationship, ConnectionStatus } from '@/constants/types';
 
-type Contact = {
-  name: string;
-  relationship: string;
-  status: string;
+import { getContacts } from '../../../services/contacts';
+
+const RELATIONSHIP_LABEL: Record<ConnectionRelationship, string> = {
+  parent: 'Parent',
+  grandparent: 'Grandparent',
+  sibling: 'Sibling',
+  partner: 'Partner',
+  friend: 'Friend',
+  other: 'Other',
 };
 
-const CONTACTS: Contact[] = [
-  { name: 'Mom', relationship: 'Parent', status: 'Sees your recaps' },
-  { name: 'Sam', relationship: 'Friend', status: 'Invite pending' },
-];
+const STATUS_LABEL: Record<ConnectionStatus, string> = {
+  pending: 'Invite pending',
+  active: 'Sees your recaps',
+  declined: 'Declined',
+};
 
 function initials(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ContactRow({ name, relationship, status }: Contact) {
+function ContactRow({ name, relationship, status }: Connection) {
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
       <ThemedView type="backgroundSelected" style={styles.avatar}>
@@ -29,27 +38,69 @@ function ContactRow({ name, relationship, status }: Contact) {
       <View style={styles.rowText}>
         <ThemedText type="smallBold">{name}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          {relationship}
+          {RELATIONSHIP_LABEL[relationship] ?? relationship}
         </ThemedText>
       </View>
       <ThemedText type="small" themeColor="textSecondary">
-        {status}
+        {STATUS_LABEL[status] ?? status}
       </ThemedText>
     </ThemedView>
   );
 }
 
 export default function PeopleScreen() {
+  // null = still loading, [] = loaded but empty
+  const [contacts, setContacts] = useState<Connection[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    try {
+      setContacts(await getContacts());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not load people');
+      setContacts([]);
+    }
+  }, []);
+
+  // Reload whenever the tab regains focus (e.g. after adding someone).
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">People</ThemedText>
-        <View style={styles.list}>
-          {CONTACTS.map((contact) => (
-            <ContactRow key={contact.name} {...contact} />
-          ))}
-        </View>
+
+        {contacts === null ? (
+          <View style={styles.centre}>
+            <ActivityIndicator />
+          </View>
+        ) : error ? (
+          <Message text={error} />
+        ) : contacts.length === 0 ? (
+          <Message text="No people yet. Invite someone to start sharing your recaps." />
+        ) : (
+          <View style={styles.list}>
+            {contacts.map((contact) => (
+              <ContactRow key={contact.id} {...contact} />
+            ))}
+          </View>
+        )}
       </SafeAreaView>
+    </ThemedView>
+  );
+}
+
+function Message({ text }: { text: string }) {
+  return (
+    <ThemedView type="backgroundElement" style={styles.messageCard}>
+      <ThemedText type="default" themeColor="textSecondary">
+        {text}
+      </ThemedText>
     </ThemedView>
   );
 }
@@ -65,8 +116,17 @@ const styles = StyleSheet.create({
     paddingBottom: BottomTabInset + Spacing.three,
     gap: Spacing.four,
   },
+  centre: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   list: {
     gap: Spacing.three,
+  },
+  messageCard: {
+    borderRadius: Spacing.four,
+    padding: Spacing.four,
   },
   row: {
     flexDirection: 'row',
