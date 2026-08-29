@@ -1,10 +1,30 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { ThemedView } from '@/components/themed-view';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import { BackgroundGradient, Colors } from '@/constants/theme';
+
+/**
+ * Navigation paints its own screen backgrounds, which would sit over the
+ * gradient. Transparent here lets it through; card and text keep headers and
+ * modals in the dark palette rather than the navigator's default white.
+ */
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+    card: Colors.light.backgroundElement,
+    text: Colors.light.text,
+    border: Colors.light.backgroundSelected,
+    primary: Colors.light.primary,
+  },
+};
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,7 +42,7 @@ function RootNavigator() {
       {/* Light icons: the background is now a vivid purple, and the default
           dark status bar icons disappear against it. */}
       <StatusBar style="light" />
-      <Stack>
+      <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Protected guard={!!profile}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="recap/[id]" options={{ title: 'Recap' }} />
@@ -53,11 +73,26 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider value={DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
+    <ThemeProvider value={navigationTheme}>
+      {/* Drawn once, behind everything. Screens are transparent and sit on top. */}
+      <View style={styles.root}>
+        <LinearGradient
+          colors={[...BackgroundGradient]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <AnimatedSplashOverlay />
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
+      </View>
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
