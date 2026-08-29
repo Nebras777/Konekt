@@ -13,15 +13,22 @@ import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { getInbox } from '../../../services/firestore';
+import {
+  clearReaction,
+  getMyReactions,
+  setReaction,
+} from '../../../services/reactions';
 import { getSavedRecapIds, saveRecap, unsaveRecap } from '../../../services/savedRecaps';
 
-const REACTIONS = ['Love it', 'Proud', 'Call me'] as const;
+import { REACTION_LABELS, type ReactionLabel } from '@/constants/types';
 
 export default function RecapsScreen() {
   const { profile, loading: profileLoading } = useAuth();
   // null = still loading, [] = loaded but empty
   const [summaries, setSummaries] = useState<DaySummary[] | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  // summaryId -> the reaction this person left on it
+  const [myReactions, setMyReactions] = useState<Record<string, ReactionLabel>>({});
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,12 +40,19 @@ export default function RecapsScreen() {
     try {
       // Recaps other people addressed to this profile, plus which of them this
       // profile has saved.
-      const [inbox, saved] = await Promise.all([
+      const [inbox, saved, reactions] = await Promise.all([
         getInbox(profile.id),
         getSavedRecapIds(profile.id),
+        getMyReactions(profile.id),
       ]);
       setSummaries(inbox);
       setSavedIds(saved);
+      setMyReactions(
+        Object.fromEntries(reactions.map((r) => [r.summaryId, r.label])) as Record<
+          string,
+          ReactionLabel
+        >,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load recaps');
       setSummaries([]);
@@ -83,6 +97,42 @@ export default function RecapsScreen() {
       }
     },
     [profile, savedIds],
+  );
+
+  const react = useCallback(
+    async (summary: DaySummary, label: ReactionLabel) => {
+      if (!profile) return;
+      const previous = myReactions[summary.id];
+      const removing = previous === label;
+
+      // Optimistic: the chip should highlight under the thumb.
+      setMyReactions((prev) => {
+        const next = { ...prev };
+        if (removing) {
+          delete next[summary.id];
+        } else {
+          next[summary.id] = label;
+        }
+        return next;
+      });
+
+      try {
+        if (removing) {
+          await clearReaction(summary.id, profile.id);
+        } else {
+          await setReaction({
+            summaryId: summary.id,
+            ownerId: summary.userId,
+            reactorId: profile.id,
+            reactorName: profile.name,
+            label,
+          });
+        }
+      } catch {
+        load(); // put the stored state back if the write failed
+      }
+    },
+    [profile, myReactions, load],
   );
 
   const visible = (summaries ?? []).filter((s) => !showSavedOnly || savedIds.has(s.id));
@@ -144,6 +194,8 @@ export default function RecapsScreen() {
                 summary={item}
                 saved={savedIds.has(item.id)}
                 onToggleSave={() => toggleSaved(item.id)}
+                myReaction={myReactions[item.id]}
+                onReact={(label) => react(item, label)}
               />
             )}
           />
@@ -158,27 +210,43 @@ function InboxRecap({
   summary,
   saved,
   onToggleSave,
+  myReaction,
+  onReact,
 }: {
   summary: DaySummary;
   saved: boolean;
   onToggleSave: () => void;
+  myReaction?: ReactionLabel;
+  onReact: (label: ReactionLabel) => void;
 }) {
   const photoCount = summary.places.filter((place) => place.photoUrl || place.mediaUri).length;
 
   return (
     <ThemedView type="backgroundElement" style={styles.recapCard}>
       <View style={styles.reactionRow}>
-        {REACTIONS.map((label) => (
-          <Pressable key={label} accessibilityRole="button" style={styles.reactionWrapper}>
-            {({ pressed }) => (
-              <ThemedView
-                type="backgroundSelected"
-                style={[styles.reactionChip, pressed && styles.pressed]}>
-                <ThemedText type="smallBold">{label}</ThemedText>
-              </ThemedView>
-            )}
-          </Pressable>
-        ))}
+        {REACTION_LABELS.map((label) => {
+          const chosen = myReaction === label;
+          return (
+            <Pressable
+              key={label}
+              onPress={() => onReact(label)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: chosen }}
+              style={styles.reactionWrapper}>
+              {({ pressed }) => (
+                <ThemedView
+                  type={chosen ? 'backgroundSelected' : 'backgroundElement'}
+                  style={[
+                    styles.reactionChip,
+                    chosen && styles.reactionChipChosen,
+                    pressed && styles.pressed,
+                  ]}>
+                  <ThemedText type="smallBold">{chosen ? `✓ ${label}` : label}</ThemedText>
+                </ThemedView>
+              )}
+            </Pressable>
+          );
+        })}
       </View>
 
       <View style={styles.titleRow}>
@@ -318,6 +386,10 @@ const styles = StyleSheet.create({
   },
   reactionWrapper: {
     flex: 1,
+  },
+  reactionChipChosen: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.15)',
   },
   reactionChip: {
     alignItems: 'center',

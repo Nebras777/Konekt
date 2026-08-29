@@ -111,3 +111,29 @@ export type Profile = {
   name: string;
   createdAt: number;
 };
+
+/** The fixed set of reactions a recipient can leave on a recap. */
+export type ReactionLabel = 'Love it' | 'Proud' | 'Call me';
+
+export const REACTION_LABELS: ReactionLabel[] = ['Love it', 'Proud', 'Call me'];
+
+/**
+ * One person's reaction to one recap. Doubles as the sender's notification:
+ * there is no separate notifications collection, because a notification here is
+ * exactly "somebody reacted", and duplicating it would mean two writes that can
+ * disagree.
+ */
+export type Reaction = {
+  id: string;
+  /** The recap reacted to. */
+  summaryId: string;
+  /** Profile that wrote the recap — who gets notified. */
+  ownerId: string;
+  reactorId: string;
+  /** Reactor's display name, so the notification reads without a second lookup. */
+  reactorName: string;
+  label: ReactionLabel;
+  createdAt: number;
+  /** False until the recap's author has seen it in their activity list. */
+  seen: boolean;
+};

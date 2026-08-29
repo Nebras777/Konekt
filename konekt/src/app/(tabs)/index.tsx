@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,8 +10,14 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import type { PlaceVisit } from '@/constants/types';
+import type { PlaceVisit, Reaction } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
+import { useAuth } from '@/hooks/use-auth';
+
+import {
+  getReactionsForOwner,
+  markReactionsSeen,
+} from '../../../services/reactions';
 
 import { totalDistanceKm } from '../../../services/sendRecap';
 import { setTodayPlaces } from '../../../services/todayDraft';
@@ -20,6 +26,34 @@ type AttachedMedia = { uri: string; type: 'photo' | 'video' };
 
 export default function TodayScreen() {
   const router = useRouter();
+  const { profile } = useAuth();
+
+  // People reacting to recaps you sent — this screen is where you find out.
+  const [activity, setActivity] = useState<Reaction[]>([]);
+
+  const loadActivity = useCallback(async () => {
+    if (!profile) return;
+    try {
+      setActivity(await getReactionsForOwner(profile.id));
+    } catch {
+      // Activity is a nice-to-have; a failure shouldn't blank the screen.
+    }
+  }, [profile]);
+
+  // Refresh on focus so a reaction left while you were on another tab appears.
+  useFocusEffect(
+    useCallback(() => {
+      loadActivity();
+    }, [loadActivity]),
+  );
+
+  const unseen = activity.filter((r) => !r.seen);
+
+  async function markAllRead() {
+    const ids = unseen.map((r) => r.id);
+    setActivity((prev) => prev.map((r) => ({ ...r, seen: true })));
+    await markReactionsSeen(ids);
+  }
   const [media, setMedia] = useState<Record<number, AttachedMedia>>({});
 
   // Whatever the user has actually captured today. Empty until they capture.
@@ -99,6 +133,41 @@ export default function TodayScreen() {
             <Stat label="stops" value={stats.stops} />
             <Stat label="photos" value={stats.photos} />
           </View>
+
+          {activity.length > 0 ? (
+            <View style={styles.activityBlock}>
+              <View style={styles.activityHeader}>
+                <ThemedText type="smallBold">
+                  Activity{unseen.length > 0 ? ` · ${unseen.length} new` : ''}
+                </ThemedText>
+                {unseen.length > 0 ? (
+                  <Pressable onPress={markAllRead} accessibilityRole="button">
+                    {({ pressed }) => (
+                      <ThemedText
+                        type="small"
+                        themeColor="textSecondary"
+                        style={pressed ? styles.pressed : undefined}>
+                        Mark all read
+                      </ThemedText>
+                    )}
+                  </Pressable>
+                ) : null}
+              </View>
+
+              {activity.slice(0, 5).map((item) => (
+                <ThemedView
+                  key={item.id}
+                  type={item.seen ? 'backgroundElement' : 'backgroundSelected'}
+                  style={styles.activityRow}>
+                  <ThemedText type="small">
+                    {item.seen ? '' : '• '}
+                    <ThemedText type="smallBold">{item.reactorName}</ThemedText> reacted “
+                    {item.label}” to your recap
+                  </ThemedText>
+                </ThemedView>
+              ))}
+            </View>
+          ) : null}
 
           {isEmpty ? (
             <ThemedText type="small" themeColor="textSecondary">
@@ -206,6 +275,19 @@ function Stat({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  activityBlock: {
+    gap: Spacing.two,
+  },
+  activityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  activityRow: {
+    borderRadius: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
   },
   captureButton: {
     alignItems: 'center',
