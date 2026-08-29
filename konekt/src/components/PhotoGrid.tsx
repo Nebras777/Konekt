@@ -41,7 +41,7 @@ export function PhotoGrid({ photos, columns = 3 }: PhotoGridProps) {
           <ThemedView
             key={`${uri}-${index}`}
             type="backgroundSelected"
-            style={[styles.photoTile, { width: tileWidth }]}>
+            style={[styles.tile, { width: tileWidth }]}>
             <Image source={{ uri }} style={styles.media} contentFit="cover" />
           </ThemedView>
         );
@@ -61,7 +61,7 @@ function VideoTile({ uri, width }: { uri: string; width: DimensionValue }) {
   });
 
   return (
-    <ThemedView type="backgroundSelected" style={[styles.videoTile, { width }]}>
+    <ThemedView type="backgroundSelected" style={[styles.tile, { width }]}>
       <VideoView player={player} style={styles.media} contentFit="cover" nativeControls />
     </ThemedView>
   );
@@ -73,13 +73,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.one,
   },
-  photoTile: {
+  tile: {
     aspectRatio: 1,
-    borderRadius: Spacing.two,
-    overflow: 'hidden',
-  },
-  videoTile: {
-    aspectRatio: 16 / 9,
     borderRadius: Spacing.two,
     overflow: 'hidden',
   },
