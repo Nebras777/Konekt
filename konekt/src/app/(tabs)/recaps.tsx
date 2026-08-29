@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
 
 import { getInbox } from '../../../services/firestore';
+import { getSavedRecapIds, saveRecap, unsaveRecap } from '../../../services/savedRecaps';
 
 const REACTIONS = ['Love it', 'Proud', 'Call me'] as const;
 
@@ -20,6 +21,8 @@ export default function RecapsScreen() {
   const { profile, loading: profileLoading } = useAuth();
   // null = still loading, [] = loaded but empty
   const [summaries, setSummaries] = useState<DaySummary[] | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -28,9 +31,14 @@ export default function RecapsScreen() {
     }
     setError(null);
     try {
-      // Recaps other people addressed to this profile.
-      const inbox = await getInbox(profile.id);
+      // Recaps other people addressed to this profile, plus which of them this
+      // profile has saved.
+      const [inbox, saved] = await Promise.all([
+        getInbox(profile.id),
+        getSavedRecapIds(profile.id),
+      ]);
       setSummaries(inbox);
+      setSavedIds(saved);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load recaps');
       setSummaries([]);
@@ -41,10 +49,71 @@ export default function RecapsScreen() {
     load();
   }, [load]);
 
+  const toggleSaved = useCallback(
+    async (summaryId: string) => {
+      if (!profile) return;
+      const wasSaved = savedIds.has(summaryId);
+
+      // Optimistic: a bookmark should respond instantly, and the worst case is
+      // a stale icon that the next load corrects.
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        if (wasSaved) {
+          next.delete(summaryId);
+        } else {
+          next.add(summaryId);
+        }
+        return next;
+      });
+
+      try {
+        await (wasSaved
+          ? unsaveRecap(profile.id, summaryId)
+          : saveRecap(profile.id, summaryId));
+      } catch {
+        setSavedIds((prev) => {
+          const next = new Set(prev);
+          if (wasSaved) {
+            next.add(summaryId);
+          } else {
+            next.delete(summaryId);
+          }
+          return next;
+        });
+      }
+    },
+    [profile, savedIds],
+  );
+
+  const visible = (summaries ?? []).filter((s) => !showSavedOnly || savedIds.has(s.id));
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Recaps</ThemedText>
+
+        {summaries && summaries.length > 0 ? (
+          <View style={styles.filterRow}>
+            {([false, true] as const).map((savedOnly) => {
+              const active = showSavedOnly === savedOnly;
+              const label = savedOnly ? `Saved (${savedIds.size})` : 'All';
+              return (
+                <Pressable
+                  key={label}
+                  onPress={() => setShowSavedOnly(savedOnly)}
+                  accessibilityRole="button">
+                  {({ pressed }) => (
+                    <ThemedView
+                      type={active ? 'backgroundSelected' : 'backgroundElement'}
+                      style={[styles.filterChip, pressed && styles.pressed]}>
+                      <ThemedText type="smallBold">{label}</ThemedText>
+                    </ThemedView>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
 
         {profileLoading ? (
           <View style={styles.centre}>
@@ -62,10 +131,21 @@ export default function RecapsScreen() {
           <Message text="No recaps yet. When someone sends you their day, it shows up here." />
         ) : (
           <FlatList
-            data={summaries}
+            data={visible}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
-            renderItem={({ item }) => <InboxRecap summary={item} />}
+            ListEmptyComponent={
+              showSavedOnly ? (
+                <Message text="Nothing saved yet. Tap Save on a recap to keep it here." />
+              ) : null
+            }
+            renderItem={({ item }) => (
+              <InboxRecap
+                summary={item}
+                saved={savedIds.has(item.id)}
+                onToggleSave={() => toggleSaved(item.id)}
+              />
+            )}
           />
         )}
       </SafeAreaView>
@@ -74,7 +154,15 @@ export default function RecapsScreen() {
 }
 
 /** One received recap, rendered read-only, with a reaction row on top. */
-function InboxRecap({ summary }: { summary: DaySummary }) {
+function InboxRecap({
+  summary,
+  saved,
+  onToggleSave,
+}: {
+  summary: DaySummary;
+  saved: boolean;
+  onToggleSave: () => void;
+}) {
   const photoCount = summary.places.filter((place) => place.photoUrl || place.mediaUri).length;
 
   return (
@@ -93,7 +181,23 @@ function InboxRecap({ summary }: { summary: DaySummary }) {
         ))}
       </View>
 
-      <ThemedText type="subtitle">{summary.senderName ?? summary.userId}&apos;s day</ThemedText>
+      <View style={styles.titleRow}>
+        <ThemedText type="subtitle" style={styles.titleText}>
+          {summary.senderName ?? summary.userId}&apos;s day
+        </ThemedText>
+        <Pressable
+          onPress={onToggleSave}
+          accessibilityRole="button"
+          accessibilityLabel={saved ? 'Remove from saved' : 'Save this recap'}>
+          {({ pressed }) => (
+            <ThemedView
+              type={saved ? 'backgroundSelected' : 'backgroundElement'}
+              style={[styles.saveChip, pressed && styles.pressed]}>
+              <ThemedText type="smallBold">{saved ? '★ Saved' : '☆ Save'}</ThemedText>
+            </ThemedView>
+          )}
+        </Pressable>
+      </View>
       <ThemedText themeColor="textSecondary">{summary.summaryText}</ThemedText>
 
       {summary.highlightNote ? (
@@ -178,6 +282,29 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     padding: Spacing.four,
     gap: Spacing.three,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+  filterChip: {
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
+    borderRadius: Spacing.four,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  titleText: {
+    flexShrink: 1,
+  },
+  saveChip: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one,
+    borderRadius: Spacing.four,
   },
   reactionRow: {
     flexDirection: 'row',
