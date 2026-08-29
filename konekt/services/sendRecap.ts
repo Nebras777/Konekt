@@ -125,13 +125,15 @@ export async function sendRecapToConnections(
   await Promise.all([
     senderCopy,
     ...recipients.map((contact) => {
+      // Connections written before grouping existed have no group and are
+      // treated as Other, so every recipient is covered by exactly one switch.
       const group = contact.group ?? 'other';
       const shareLocation =
         group === 'family'
           ? privacy.shareLocationWithFamily
           : group === 'friends'
             ? privacy.shareLocationWithFriends
-            : true;
+            : privacy.shareLocationWithOthers;
 
       // Withheld coordinates are omitted from the document, not hidden in the
       // UI: writing them and asking the recipient's app not to draw them would

@@ -15,6 +15,7 @@ const COLLECTION = 'privacy_settings';
 export type PrivacySettings = {
   shareLocationWithFamily: boolean;
   shareLocationWithFriends: boolean;
+  shareLocationWithOthers: boolean;
   includePhotos: boolean;
 };
 
@@ -22,6 +23,7 @@ export type PrivacySettings = {
 export const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
   shareLocationWithFamily: true,
   shareLocationWithFriends: true,
+  shareLocationWithOthers: true,
   includePhotos: true,
 };
 
