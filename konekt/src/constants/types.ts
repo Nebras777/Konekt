@@ -38,3 +38,22 @@ export const DEMO_USERS = {
   sender: 'sebti_demo',
   recipient: 'family_demo',
 } as const;
+
+export type ConnectionStatus = 'pending' | 'active' | 'declined';
+
+export type ConnectionRelationship =
+  | 'parent'
+  | 'grandparent'
+  | 'sibling'
+  | 'partner'
+  | 'friend'
+  | 'other';
+
+// A person the user has invited to see their recaps.
+export type Connection = {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: ConnectionRelationship;
+  status: ConnectionStatus;
+};
