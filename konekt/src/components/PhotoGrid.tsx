@@ -2,7 +2,6 @@ import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, View, type DimensionValue } from 'react-native';
 
-import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { Spacing } from '@/constants/theme';
@@ -26,18 +25,24 @@ export function PhotoGrid({ photos, columns = 3 }: PhotoGridProps) {
     return null;
   }
 
-  const tileWidth: DimensionValue = `${100 / columns}%`;
+  // Never squeeze fewer items than `columns` into narrow tiles — a single
+  // photo/video should take the full width, not sit in a 1/3-width slot
+  // meant for a multi-photo grid.
+  const effectiveColumns = Math.min(columns, photos.length);
+  const tileWidth: DimensionValue = `${100 / effectiveColumns}%`;
 
   return (
     <View style={styles.grid}>
       {photos.map((photo, index) => {
         const { uri, type } = normalize(photo);
-        return (
+        return type === 'video' ? (
+          <VideoTile key={`${uri}-${index}`} uri={uri} width={tileWidth} />
+        ) : (
           <ThemedView
             key={`${uri}-${index}`}
             type="backgroundSelected"
-            style={[styles.tile, { width: tileWidth }]}>
-            {type === 'video' ? <VideoTile uri={uri} /> : <PhotoTile uri={uri} />}
+            style={[styles.photoTile, { width: tileWidth }]}>
+            <Image source={{ uri }} style={styles.media} contentFit="cover" />
           </ThemedView>
         );
       })}
@@ -45,26 +50,20 @@ export function PhotoGrid({ photos, columns = 3 }: PhotoGridProps) {
   );
 }
 
-function PhotoTile({ uri }: { uri: string }) {
-  return <Image source={{ uri }} style={styles.image} contentFit="cover" />;
-}
-
-function VideoTile({ uri }: { uri: string }) {
+function VideoTile({ uri, width }: { uri: string; width: DimensionValue }) {
+  // Muted, non-looping, not auto-playing: the native controls (which include
+  // their own fullscreen button — see expo-video's FullscreenOptions, default
+  // enable: true) own all interaction here. A custom Pressable overlay was
+  // tried first but the native player's own touch handling swallowed the tap
+  // before it ever reached it.
   const player = useVideoPlayer(uri, (p) => {
-    p.loop = true;
-    p.muted = true;
-    p.play();
+    p.muted = false;
   });
 
   return (
-    <View style={styles.image}>
-      <VideoView player={player} style={styles.image} contentFit="cover" nativeControls={false} />
-      <View style={styles.playBadge}>
-        <ThemedText type="small" themeColor="background">
-          {'▶'}
-        </ThemedText>
-      </View>
-    </View>
+    <ThemedView type="backgroundSelected" style={[styles.videoTile, { width }]}>
+      <VideoView player={player} style={styles.media} contentFit="cover" nativeControls />
+    </ThemedView>
   );
 }
 
@@ -74,24 +73,18 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.one,
   },
-  tile: {
+  photoTile: {
     aspectRatio: 1,
     borderRadius: Spacing.two,
     overflow: 'hidden',
   },
-  image: {
+  videoTile: {
+    aspectRatio: 16 / 9,
+    borderRadius: Spacing.two,
+    overflow: 'hidden',
+  },
+  media: {
     width: '100%',
     height: '100%',
-  },
-  playBadge: {
-    position: 'absolute',
-    bottom: Spacing.one,
-    right: Spacing.one,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
