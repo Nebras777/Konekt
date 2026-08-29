@@ -24,62 +24,6 @@ import { clearDraftRecap, getDraftRecap } from '../../../services/draftRecap';
 import { getDaySummaryById, saveDaySummary } from '../../../services/firestore';
 import { totalDistanceKm } from '../../../services/sendRecap';
 
-const DUMMY_DAY_SUMMARY: DaySummary = {
-  id: 'demo-day-1',
-  userId: DEMO_USERS.sender,
-  recipientId: DEMO_USERS.recipient,
-  date: '2026-08-29',
-  summaryText:
-    'Sebti had a full day — started at the library, grabbed lunch with friends, hit the gym, and wound down with a walk in the park.',
-  distanceKm: 6.4,
-  createdAt: Date.now(),
-  places: [
-    {
-      name: 'Home',
-      type: 'home',
-      lat: 40.7128,
-      lng: -74.006,
-      time: '8:10 AM',
-      subtitle: 'Left for campus',
-    },
-    {
-      name: 'Fischer Library',
-      type: 'study',
-      lat: 40.7295,
-      lng: -73.9965,
-      time: '9:00 AM',
-      subtitle: 'Studied for 3 hours',
-      photoUrl: 'https://picsum.photos/seed/library/400/400',
-    },
-    {
-      name: 'Sunrise Diner',
-      type: 'food',
-      lat: 40.731,
-      lng: -73.99,
-      time: '12:30 PM',
-      subtitle: 'Lunch with friends',
-      photoUrl: 'https://picsum.photos/seed/diner/400/400',
-    },
-    {
-      name: 'City Gym',
-      type: 'gym',
-      lat: 40.733,
-      lng: -73.985,
-      time: '4:15 PM',
-      subtitle: 'Leg day',
-    },
-    {
-      name: 'Riverside Park',
-      type: 'outdoor',
-      lat: 40.74,
-      lng: -73.98,
-      time: '6:45 PM',
-      subtitle: 'Evening walk',
-      photoUrl: 'https://picsum.photos/seed/park/400/400',
-    },
-  ],
-};
-
 export type RecapScreenContentProps = {
   daySummary: DaySummary;
   /** True once this recap is already saved (e.g. viewed from someone's inbox) — hides editing/send. */
@@ -247,16 +191,15 @@ type RouteStatus = 'loading' | 'error' | 'draft' | 'sent';
 
 export default function RecapRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const isDemoId = !id || id === DUMMY_DAY_SUMMARY.id;
 
   const [status, setStatus] = useState<RouteStatus>('loading');
   const [daySummary, setDaySummary] = useState<DaySummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isDemoId) {
-      setDaySummary(DUMMY_DAY_SUMMARY);
-      setStatus('draft');
+    if (!id) {
+      setError('No recap was requested.');
+      setStatus('error');
       return;
     }
 
@@ -291,7 +234,7 @@ export default function RecapRoute() {
     return () => {
       cancelled = true;
     };
-  }, [id, isDemoId]);
+  }, [id]);
 
   if (status === 'error') {
     return (

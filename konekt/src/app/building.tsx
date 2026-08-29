@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { mockRoute } from '@/constants/mockRoute';
+import { useDayRoute } from '@/hooks/use-day-route';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -31,6 +31,12 @@ export default function BuildingScreen() {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
+  // Read through a ref so capturing a location mid-build doesn't restart the
+  // effect and kick off a second recap.
+  const { route } = useDayRoute();
+  const routeRef = useRef(route);
+  routeRef.current = route;
+
   useEffect(() => {
     let cancelled = false;
     setError(null);
@@ -45,7 +51,9 @@ export default function BuildingScreen() {
       ),
     );
 
-    buildDayRecap(getTodayPlaces() ?? mockRoute)
+    // Prefer the draft handed over from the Today screen (it carries any
+    // attached media); fall back to the live captured route.
+    buildDayRecap(getTodayPlaces() ?? routeRef.current)
       .then((summary) => {
         if (cancelled) return;
         setCompletedCount(STEPS.length);
