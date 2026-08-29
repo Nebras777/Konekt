@@ -2,7 +2,11 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import type { Profile } from '@/constants/types';
 
-import { getCurrentProfile, setCurrentProfile } from '../../services/currentProfile';
+import {
+  clearCurrentProfile,
+  getCurrentProfile,
+  setCurrentProfile,
+} from '../../services/currentProfile';
 
 type AuthContextValue = {
   /** null while still checking storage, undefined-like "not signed in" is represented as null too once checked. */
@@ -10,6 +14,11 @@ type AuthContextValue = {
   loading: boolean;
   /** Sign in as this profile — persists it and updates the app immediately. */
   signIn: (profile: Profile) => Promise<void>;
+  /**
+   * Sign out. The root layout guards the tabs on `profile`, so clearing it
+   * routes back to the welcome screen on its own.
+   */
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -29,7 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(next);
   }
 
-  return <AuthContext.Provider value={{ profile, loading, signIn }}>{children}</AuthContext.Provider>;
+  async function signOut() {
+    await clearCurrentProfile();
+    setProfile(null);
+  }
+
+  return (
+    <AuthContext.Provider value={{ profile, loading, signIn, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

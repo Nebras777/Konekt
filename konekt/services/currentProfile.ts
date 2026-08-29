@@ -16,3 +16,12 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   const raw = await AsyncStorage.getItem(STORAGE_KEY);
   return raw ? (JSON.parse(raw) as Profile) : null;
 }
+
+/**
+ * Forget the signed-in profile. Only clears which profile this device is
+ * signed in as — the profile document itself, and everything it has sent,
+ * stay in Firestore so logging back in restores them.
+ */
+export async function clearCurrentProfile(): Promise<void> {
+  await AsyncStorage.removeItem(STORAGE_KEY);
+}

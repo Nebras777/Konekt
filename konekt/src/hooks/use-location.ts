@@ -212,6 +212,15 @@ export function useLocation(options: UseLocationOptions = {}): UseLocation {
   // Pull this profile's previously captured points back in.
   useEffect(() => {
     if (!profile) {
+      // Signed out: drop the previous profile's stops from memory so the next
+      // person to sign in on this device never sees them. Their stored copy is
+      // untouched and comes back when they sign in again.
+      if (storeOwnerId) {
+        storeOwnerId = null;
+        hydration = null;
+        capturedPoints = [];
+        emit();
+      }
       return;
     }
     void hydrate(profile.id).then(() => {
