@@ -13,6 +13,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Accents, Danger, Radii, Spacing, Surface } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 
 import { getReactionsForOwner } from '../../../services/reactions';
@@ -25,6 +26,7 @@ type AttachedMedia = { uri: string; type: 'photo' | 'video' };
 export default function TodayScreen() {
   const router = useRouter();
   const { profile } = useAuth();
+  const theme = useTheme();
 
   // Unread count for the bell. The list itself lives on the activity screen.
   const [unseenCount, setUnseenCount] = useState(0);
@@ -129,7 +131,7 @@ export default function TodayScreen() {
             }>
             {({ pressed }) => (
               <View style={[styles.bellWrapper, pressed && styles.pressed]}>
-                <BellIcon color="#C9CAD2" />
+                <BellIcon color={theme.textSecondary} />
                 {unseenCount > 0 ? (
                   <ThemedView type="backgroundSelected" style={styles.badge}>
                     <ThemedText type="small">{unseenCount > 9 ? '9+' : unseenCount}</ThemedText>
@@ -143,7 +145,7 @@ export default function TodayScreen() {
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
             <Stat label="km" value={stats.km} accent={Accents.mint} tilt="-1.5deg" />
-            <Stat label="stops" value={stats.stops} accent={Accents.sun} tilt="1deg" />
+            <Stat label="stops" value={stats.stops} accent={Accents.amber} tilt="1deg" />
             <Stat label="photos" value={stats.photos} accent={Accents.sky} tilt="-0.8deg" />
           </View>
 

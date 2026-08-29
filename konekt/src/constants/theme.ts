@@ -9,37 +9,37 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** White on the purple gradient and on the dark cards alike. */
-    text: '#FFFFFF',
+    /** Warm off-white rather than pure white — softer on a dark ground. */
+    text: '#F3F8F9',
+    /** Base colour, the gradient's darkest end, so nothing flashes bright. */
+    background: '#0F2A3F',
     /**
-     * The gradient's starting colour, used as the base everywhere. Screens opt
-     * into the gradient itself with <ThemedView gradient>; this is what shows
-     * if the gradient can't draw, so it is never grey.
+     * Cards are light glass, not dark blocks. On a mid-tone background a
+     * lighter surface reads as raised, where a darker one reads as a hole —
+     * and letting the gradient through means cards higher up a screen pick up
+     * more blue and lower ones more teal, so repeated cards vary on their own.
      */
-    background: '#900CFF',
-    /**
-     * Cards are translucent dark rather than solid grey. Because the gradient
-     * shows through, a card near the top of a screen picks up more purple and
-     * one further down more magenta — so repeated cards vary on their own
-     * instead of tiling the same flat block forty times.
-     */
-    backgroundElement: 'rgba(26,26,34,0.66)',
-    /** Selected chips and pressed states: same surface, lifted. */
-    backgroundSelected: 'rgba(72,66,92,0.78)',
-    /** Muted white. Grey secondary text would disappear on both surfaces. */
-    textSecondary: '#B9BAC4',
-    /** Accent for switches, picked from the gradient's bright end. */
-    primary: '#CC1BFF',
+    backgroundElement: 'rgba(255,255,255,0.09)',
+    /** Selected and pressed: the same glass, lifted. */
+    backgroundSelected: 'rgba(255,255,255,0.18)',
+    /** Muted white rather than grey, which would go murky over the gradient. */
+    textSecondary: 'rgba(243,248,249,0.68)',
+    /** Accent for switches: the warmest thing in the palette. */
+    primary: '#6EE7B7',
   },
 } as const;
 
 /**
- * Background gradient, vivid purple into magenta.
+ * Background gradient: deep sea blue easing into teal.
  *
- * Kept here so every screen draws the same one — a gradient defined per screen
- * drifts, and the seams show when you move between tabs.
+ * Chosen for what the app is — someone telling their family about their day at
+ * the end of it. Calm and evening-toned, and dark enough that white text sits
+ * on it without glare, which the previous vivid purple couldn't manage.
+ *
+ * Kept here so every screen draws the same one; a gradient defined per screen
+ * drifts and shows seams between tabs.
  */
-export const BackgroundGradient = ['#900CFF', '#CC1BFF'] as const;
+export const BackgroundGradient = ['#0F2A3F', '#16536A', '#1B7E74'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -49,11 +49,13 @@ export type ThemeColor = keyof typeof Colors.light;
  * than on the purple, which is where they all appear.
  */
 export const Accents = {
-  mint: '#3DDC97',
-  sun: '#FFD166',
-  coral: '#FF6B6B',
-  sky: '#4CC9F0',
-  lilac: '#C77DFF',
+  /** Warm on purpose: against a cool blue-teal ground, warm accents advance
+   *  and cool ones disappear into the background. */
+  amber: '#FFC15E',
+  coral: '#FF8A7A',
+  mint: '#6EE7B7',
+  sky: '#7DD3FC',
+  rose: '#F9A8D4',
 } as const;
 
 /**
@@ -63,14 +65,14 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: 'rgba(200,42,50,0.82)',
-  border: 'rgba(255,120,124,0.55)',
+  fill: 'rgba(214,69,74,0.88)',
+  border: 'rgba(255,138,122,0.55)',
 } as const;
 
 export const Surface = {
-  border: 'rgba(255,255,255,0.14)',
-  borderStrong: 'rgba(255,255,255,0.22)',
-  shadow: 'rgba(0,0,0,0.35)',
+  border: 'rgba(255,255,255,0.16)',
+  borderStrong: 'rgba(255,255,255,0.30)',
+  shadow: 'rgba(6,20,30,0.45)',
 } as const;
 
 /** Corner radii, larger and softer than the old uniform 16. */
@@ -87,18 +89,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const SURFACE_ALPHAS = [0.6, 0.68, 0.63, 0.72] as const;
+const SURFACE_ALPHAS = [0.08, 0.11, 0.09, 0.13] as const;
 
 export function surfaceFor(index: number): string {
-  return `rgba(26,26,34,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
+  return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
 }
 
 export const AccentList = [
-  Accents.mint,
-  Accents.sun,
+  Accents.amber,
   Accents.coral,
+  Accents.mint,
   Accents.sky,
-  Accents.lilac,
+  Accents.rose,
 ] as const;
 
 /**
