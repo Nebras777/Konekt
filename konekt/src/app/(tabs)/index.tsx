@@ -9,6 +9,47 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BottomTabInset, Spacing } from '@/constants/theme';
+import type { PlaceVisit } from '@/constants/types';
+
+const TODAY_DISTANCE_KM = 4.6;
+
+const TODAY_PLACES: PlaceVisit[] = [
+  {
+    name: 'Home',
+    type: 'home',
+    lat: 40.7128,
+    lng: -74.006,
+    time: '8:10 AM',
+    subtitle: 'Left for campus',
+  },
+  {
+    name: 'Fischer Library',
+    type: 'study',
+    lat: 40.7295,
+    lng: -73.9965,
+    time: '9:00 AM',
+    subtitle: 'Studied for 3 hours',
+    photoUrl: 'https://picsum.photos/seed/library/400/400',
+  },
+  {
+    name: 'Sunrise Diner',
+    type: 'food',
+    lat: 40.731,
+    lng: -73.99,
+    time: '12:30 PM',
+    subtitle: 'Lunch with friends',
+    photoUrl: 'https://picsum.photos/seed/diner/400/400',
+  },
+  {
+    name: 'City Gym',
+    type: 'gym',
+    lat: 40.733,
+    lng: -73.985,
+    time: '4:15 PM',
+    subtitle: 'Leg day',
+  },
+];
 import { mockRoute } from '@/constants/mockRoute';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
@@ -26,6 +67,9 @@ export default function TodayScreen() {
     Object.keys(media).length;
 
   const stats = {
+    km: TODAY_DISTANCE_KM.toFixed(1),
+    stops: String(TODAY_PLACES.length),
+    photos: String(TODAY_PLACES.filter((place) => place.photoUrl).length),
     stops: String(mockRoute.length),
     photos: String(photoCount),
   };
@@ -72,6 +116,13 @@ export default function TodayScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <ThemedText type="title" style={styles.title}>
+            Today
+          </ThemedText>
+
+          <View style={styles.statsRow}>
+            <Stat label="km" value={stats.km} />
         <Image
           source={require('@/assets/images/logo-wordmark.png')}
           style={styles.logo}
@@ -121,6 +172,15 @@ export default function TodayScreen() {
                 </DayCard>
               );
             })}
+            {TODAY_PLACES.map((place, index) => (
+            {mockRoute.map((place, index) => (
+              <DayCard
+                key={`${place.name}-${index}`}
+                time={place.time}
+                title={place.name}
+                subtitle={place.subtitle}
+              />
+            ))}
           </View>
         </ScrollView>
 
@@ -155,15 +215,14 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    gap: Spacing.four,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.five,
-    paddingBottom: BottomTabInset + Spacing.three,
+    paddingBottom: BottomTabInset,
   },
-  logo: {
-    height: 38,
-    width: 38 * (1761 / 681),
-    alignSelf: 'flex-start',
+  content: {
+    padding: Spacing.four,
+    gap: Spacing.four,
+  },
+  title: {
+    marginBottom: Spacing.two,
   },
   content: {
     gap: Spacing.four,
@@ -188,6 +247,8 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
   },
   recapButton: {
+    marginHorizontal: Spacing.four,
+    marginTop: Spacing.two,
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Spacing.four,

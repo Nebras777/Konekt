@@ -11,13 +11,11 @@ const TOGGLES = [
   'Share location with family',
   'Share location with friends',
   'Include photos in recaps',
-  'Show exact addresses',
-  'Pause sharing overnight',
 ];
 
 export default function PrivacyScreen() {
   const theme = useTheme();
-  const [values, setValues] = useState<boolean[]>([true, false, true, false, true]);
+  const [values, setValues] = useState<boolean[]>([false, false, false]);
 
   const toggle = (index: number) => {
     setValues((prev) => prev.map((value, i) => (i === index ? !value : value)));
