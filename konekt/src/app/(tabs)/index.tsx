@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   statTile: {
     flex: 1,
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 2,
     borderRadius: Radii.lg,
     paddingVertical: Spacing.three,
     gap: Spacing.half,

@@ -9,35 +9,36 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Ink navy, not black — printed ink is never truly black. */
-    text: '#1E2749',
+    /** Deep sea navy. Reads as the dark end of the same blue rather than as
+     *  an unrelated black dropped on top. */
+    text: '#0E3556',
     /** Base colour, the gradient's first stop, so nothing flashes white. */
-    background: '#FFF3D6',
+    background: '#8FE1FF',
     /**
-     * Cards are near-solid white with an ink outline, like stickers laid on
-     * paper — not glass. Glass was right on a dark ground; on warm paper an
-     * opaque card with a drawn edge is what reads as an object placed on top.
+     * Cards are white, slightly translucent, so the sky shows faintly through.
+     * Cards high on a screen pick up cyan and lower ones periwinkle, which
+     * varies a list without giving cards different colours.
      */
-    backgroundElement: '#FFFDF8',
-    /** Selected and pressed: a wash of ink rather than more white. */
-    backgroundSelected: '#E7EAFF',
-    textSecondary: 'rgba(30,39,73,0.62)',
-    /** Accent for switches. */
-    primary: '#2D6BFF',
+    backgroundElement: 'rgba(255,255,255,0.86)',
+    /** Selected and pressed: solid white, the brightest thing available. */
+    backgroundSelected: '#FFFFFF',
+    textSecondary: 'rgba(14,53,86,0.60)',
+    /** Accent for switches: coral, the complement of sky blue. */
+    primary: '#FF7A59',
   },
 } as const;
 
 /** Solid surface for the tab bar. Native bars render alpha unreliably. */
-export const TabBarSurface = '#FFFDF8';
+export const TabBarSurface = '#FFFFFF';
 
 /**
- * Background gradient: buttercream into apricot into soft rose.
+ * Background gradient: cyan into sky into periwinkle.
  *
- * Warm paper rather than a colour wash — the palette's character comes from
- * the ink outlines and the print-bright accents sitting on it, not from the
- * background shouting.
+ * Light and airy — the palette's warmth comes from the accents sitting on it,
+ * not from the background. Pale enough that dark text needs no help, which is
+ * what lets the cards stay light instead of heavy.
  */
-export const BackgroundGradient = ['#FFF3D6', '#FFE3C4', '#FFD6DC'] as const;
+export const BackgroundGradient = ['#8FE1FF', '#7FC8FB', '#79ADF2'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -47,12 +48,13 @@ export type ThemeColor = keyof typeof Colors.light;
  * than on the purple, which is where they all appear.
  */
 export const Accents = {
-  /** Risograph inks: few colours, each fully saturated, none muddy. */
-  vermilion: '#FF5C39',
-  blue: '#2D6BFF',
-  green: '#00A86B',
-  magenta: '#FF3D9A',
-  yellow: '#FFB800',
+  /** Warm, to complement a cool ground — on sky blue these advance where
+   *  another blue would disappear. */
+  coral: '#FF7A59',
+  sunshine: '#FFC24D',
+  mint: '#2ED3A7',
+  violet: '#7C6BFF',
+  pink: '#FF6FA5',
 } as const;
 
 /**
@@ -62,20 +64,21 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: '#FF3B30',
-  border: 'rgba(30,39,73,0.85)',
+  fill: '#FF4D4D',
+  border: 'rgba(255,77,77,0.45)',
   /** Text on the red fill. The theme's ink is dark and unreadable on it. */
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  /** A drawn ink edge, not a hairline. This is what makes a card an object. */
-  border: 'rgba(30,39,73,0.85)',
-  borderStrong: 'rgba(30,39,73,0.95)',
-  /** Ink-tinted, so shadows warm the paper rather than greying it. */
-  shadow: 'rgba(30,39,73,0.30)',
-  /** Outlines are drawn, so they need weight. */
-  borderWidth: 2,
+  /** A soft navy hairline. The heavy ink outline of the previous scheme fought
+   *  the softness of this one — airy backgrounds want thin edges. */
+  border: 'rgba(14,53,86,0.10)',
+  /** A white top edge, so a card looks lit from above rather than cut out. */
+  borderStrong: 'rgba(255,255,255,0.95)',
+  /** Blue-tinted, so shadows sit in the sky rather than greying it. */
+  shadow: 'rgba(20,70,120,0.20)',
+  borderWidth: 1,
 } as const;
 
 /** Corner radii, larger and softer than the old uniform 16. */
@@ -92,18 +95,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['#FFFDF8', '#FFFAF0', '#FDFBFF', '#FFF9F4'] as const;
+const SURFACE_ALPHAS = [0.82, 0.90, 0.86, 0.94] as const;
 
 export function surfaceFor(index: number): string {
-  return CARD_TINTS[index % CARD_TINTS.length];
+  return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
 }
 
 export const AccentList = [
-  Accents.vermilion,
-  Accents.blue,
-  Accents.green,
-  Accents.magenta,
-  Accents.yellow,
+  Accents.coral,
+  Accents.sunshine,
+  Accents.mint,
+  Accents.violet,
+  Accents.pink,
 ] as const;
 
 /**
