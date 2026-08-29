@@ -9,7 +9,7 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { Accents, BottomTabInset, Spacing } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useAuth } from '@/hooks/use-auth';
@@ -141,9 +141,9 @@ export default function TodayScreen() {
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
-            <Stat label="km" value={stats.km} />
-            <Stat label="stops" value={stats.stops} />
-            <Stat label="photos" value={stats.photos} />
+            <Stat label="km" value={stats.km} accent={Accents.mint} tilt="-1.5deg" />
+            <Stat label="stops" value={stats.stops} accent={Accents.sun} tilt="1deg" />
+            <Stat label="photos" value={stats.photos} accent={Accents.sky} tilt="-0.8deg" />
           </View>
 
           {isEmpty ? (
@@ -176,6 +176,7 @@ export default function TodayScreen() {
               return (
                 <DayCard
                   key={`${place.name}-${index}`}
+                  index={index}
                   time={place.time}
                   title={place.name}
                   subtitle={place.subtitle}>
@@ -238,9 +239,21 @@ export default function TodayScreen() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  accent,
+  tilt,
+}: {
+  label: string;
+  value: string;
+  accent: string;
+  tilt: string;
+}) {
   return (
-    <ThemedView type="backgroundElement" style={styles.statTile}>
+    <ThemedView
+      type="backgroundElement"
+      style={[styles.statTile, { borderColor: accent, transform: [{ rotate: tilt }] }]}>
       <ThemedText type="subtitle">{value}</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
         {label}
@@ -308,6 +321,7 @@ const styles = StyleSheet.create({
   statTile: {
     flex: 1,
     alignItems: 'center',
+    borderWidth: 2,
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
     gap: Spacing.half,

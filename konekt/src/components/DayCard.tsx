@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { Spacing } from '@/constants/theme';
+import { accentFor, Spacing, tiltFor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type DayCardProps = {
@@ -14,6 +14,8 @@ export type DayCardProps = {
   excluded?: boolean;
   onToggleExclude?: () => void;
   children?: ReactNode;
+  /** Position in a list, used to vary the tilt so stacked cards don't align. */
+  index?: number;
 };
 
 export function DayCard({
@@ -23,12 +25,22 @@ export function DayCard({
   excluded = false,
   onToggleExclude,
   children,
+  index = 0,
 }: DayCardProps) {
   const theme = useTheme();
   const included = !excluded;
 
   return (
-    <ThemedView type="backgroundElement" style={[styles.card, excluded && styles.cardExcluded]}>
+    <ThemedView
+      type="backgroundElement"
+      style={[
+        styles.card,
+        {
+          transform: [{ rotate: tiltFor(index) }],
+          borderLeftColor: accentFor(title),
+        },
+        excluded && styles.cardExcluded,
+      ]}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ThemedText type="smallBold" themeColor="textSecondary">
@@ -68,6 +80,11 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     padding: Spacing.three,
     gap: Spacing.two,
+    // The accent lives on an edge rather than the fill, so the card stays
+    // readable while still being identifiably "this stop".
+    borderLeftWidth: 4,
+    // Tilted cards would otherwise clip their neighbours' corners.
+    marginHorizontal: Spacing.one,
   },
   cardExcluded: {
     opacity: 0.5,

@@ -301,6 +301,7 @@ function InboxRecap({
         {summary.places.map((place, index) => (
           <DayCard
             key={`${place.name}-${index}`}
+            index={index}
             time={place.time}
             title={place.name}
             subtitle={place.subtitle}>

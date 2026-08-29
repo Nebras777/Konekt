@@ -37,6 +37,50 @@ export const BackgroundGradient = ['#900CFF', '#CC1BFF'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
+/**
+ * Playful accents, used to give repeated elements their own identity — stat
+ * tiles, avatars, stop markers. Chosen to sit on the dark grey cards rather
+ * than on the purple, which is where they all appear.
+ */
+export const Accents = {
+  mint: '#3DDC97',
+  sun: '#FFD166',
+  coral: '#FF6B6B',
+  sky: '#4CC9F0',
+  lilac: '#C77DFF',
+} as const;
+
+export const AccentList = [
+  Accents.mint,
+  Accents.sun,
+  Accents.coral,
+  Accents.sky,
+  Accents.lilac,
+] as const;
+
+/**
+ * A stable accent for a given string, so the same person or stop keeps the same
+ * colour between renders and between screens. Random would flicker on reload.
+ */
+export function accentFor(key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return AccentList[hash % AccentList.length];
+}
+
+/**
+ * Small alternating tilts. Applied to repeated cards so a list looks hand-placed
+ * rather than machine-stacked. Kept under two degrees: past that, text starts to
+ * look like a mistake rather than a choice.
+ */
+export const TILTS = ['-1.2deg', '0.9deg', '-0.6deg', '1.4deg'] as const;
+
+export function tiltFor(index: number): string {
+  return TILTS[index % TILTS.length];
+}
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */

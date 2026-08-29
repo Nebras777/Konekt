@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { accentFor, BottomTabInset, Spacing } from '@/constants/theme';
 import type {
   Connection,
   ConnectionGroup,
@@ -66,9 +66,11 @@ function ContactRow({
 
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
-      <ThemedView type="backgroundSelected" style={styles.avatar}>
-        <ThemedText type="smallBold">{initials(name)}</ThemedText>
-      </ThemedView>
+      <View style={[styles.avatar, { backgroundColor: accentFor(name) }]}>
+        <ThemedText type="smallBold" style={styles.avatarText}>
+          {initials(name)}
+        </ThemedText>
+      </View>
       <View style={styles.rowText}>
         <ThemedText type="smallBold">{name}</ThemedText>
         {/* Only shown when it says something. Inviting a Konekt profile doesn't
@@ -426,6 +428,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderRadius: Spacing.four,
     gap: Spacing.three,
+  },
+  avatarText: {
+    // The accents are bright, so initials sit dark on them rather than white.
+    color: '#1B1B22',
   },
   avatar: {
     width: 40,
