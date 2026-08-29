@@ -1,12 +1,16 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { mockRoute } from '@/constants/mockRoute';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+
+import { setDraftRecap } from '../../services/draftRecap';
+import { buildDayRecap } from '../../services/sendRecap';
 
 const STEPS = [
   'Gathering today’s stops',
@@ -15,29 +19,48 @@ const STEPS = [
   'Writing your recap',
 ];
 
-const DUMMY_RECAP_ID = 'demo-day-1';
-const STEP_INTERVAL_MS = 500;
+// Visual pacing only — the checklist advances on this timer while the real
+// pipeline runs, but never reaches the last step until it actually finishes.
+const STEP_INTERVAL_MS = 700;
 
 export default function BuildingScreen() {
   const router = useRouter();
   const theme = useTheme();
   const [completedCount, setCompletedCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    const stepTimeouts = STEPS.map((_, index) =>
-      setTimeout(() => setCompletedCount(index + 1), STEP_INTERVAL_MS * (index + 1))
+    let cancelled = false;
+    setError(null);
+    setCompletedCount(0);
+
+    const stepTimers = STEPS.slice(0, -1).map((_, index) =>
+      setTimeout(
+        () => {
+          if (!cancelled) setCompletedCount(index + 1);
+        },
+        STEP_INTERVAL_MS * (index + 1),
+      ),
     );
 
-    const navigationTimeout = setTimeout(
-      () => router.replace('/recap/' + DUMMY_RECAP_ID),
-      STEP_INTERVAL_MS * (STEPS.length + 1)
-    );
+    buildDayRecap(mockRoute)
+      .then((summary) => {
+        if (cancelled) return;
+        setCompletedCount(STEPS.length);
+        setDraftRecap(summary);
+        router.replace(`/recap/${summary.id}`);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : 'Could not build your recap');
+      });
 
     return () => {
-      stepTimeouts.forEach(clearTimeout);
-      clearTimeout(navigationTimeout);
+      cancelled = true;
+      stepTimers.forEach(clearTimeout);
     };
-  }, [router]);
+  }, [router, attempt]);
 
   return (
     <ThemedView style={styles.container}>
@@ -66,6 +89,21 @@ export default function BuildingScreen() {
             );
           })}
         </View>
+
+        {error ? (
+          <ThemedView type="backgroundElement" style={styles.errorCard}>
+            <ThemedText themeColor="textSecondary">{error}</ThemedText>
+            <Pressable onPress={() => setAttempt((a) => a + 1)} accessibilityRole="button">
+              {({ pressed }) => (
+                <ThemedView
+                  type="backgroundSelected"
+                  style={[styles.retryButton, pressed && styles.pressed]}>
+                  <ThemedText type="smallBold">Try again</ThemedText>
+                </ThemedView>
+              )}
+            </Pressable>
+          </ThemedView>
+        ) : null}
       </SafeAreaView>
     </ThemedView>
   );
@@ -96,5 +134,19 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  errorCard: {
+    borderRadius: Spacing.four,
+    padding: Spacing.four,
+    gap: Spacing.three,
+    alignItems: 'flex-start',
+  },
+  retryButton: {
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
+    borderRadius: Spacing.four,
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });
