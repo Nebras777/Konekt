@@ -5,7 +5,7 @@ import { useFocusEffect } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Radii, Spacing, Surface, surfaceFor } from '@/constants/theme';
+import { Accents, Radii, Spacing, Surface, surfaceFor } from '@/constants/theme';
 import type { Reaction } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -86,7 +86,9 @@ export default function ActivityScreen() {
                 type={item.seen ? 'backgroundElement' : 'backgroundSelected'}
                 style={[
                   styles.row,
-                  item.seen ? { backgroundColor: surfaceFor(index) } : null,
+                  item.seen
+                    ? { backgroundColor: surfaceFor(index) }
+                    : { borderColor: Accents.cyan, borderWidth: 2 },
                 ]}>
                 <ThemedText type="small" style={styles.rowText}>
                   {item.seen ? '' : '• '}

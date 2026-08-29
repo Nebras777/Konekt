@@ -122,13 +122,15 @@ export default function TodayScreen() {
 
   return (
     <ThemedView gradient style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
         <View style={styles.headerRow}>
-          <Image
-            source={require('@/assets/images/logo-wordmark.png')}
-            style={styles.logo}
-            contentFit="contain"
-          />
+          <View style={styles.logoPlate}>
+            <Image
+              source={require('@/assets/images/logo-wordmark.png')}
+              style={styles.logo}
+              contentFit="contain"
+            />
+          </View>
 
           <Pressable
             onPress={() => router.push('/activity')}
@@ -331,9 +333,32 @@ const styles = StyleSheet.create({
     // BottomTabInset on top of it left the buttons floating high above it.
     paddingBottom: Spacing.one,
   },
+  logoPlate: {
+    /**
+     * The wordmark runs periwinkle to navy, and the navy end all but disappears
+     * on a dark ground. A pale plate behind it restores the contrast the
+     * artwork was drawn for, without recolouring the logo and losing its
+     * gradient.
+     */
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: Radii.pill,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    shadowColor: 'rgba(255,255,255,0.65)',
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 0 },
+  },
   logo: {
-    width: 140,
-    height: 32,
+    height: 26,
+    /**
+     * Sized by the wordmark's own aspect ratio rather than a fixed width.
+     * The image is roughly 2.59:1; in a 140x32 box, contentFit="contain"
+     * rendered it about 83 wide and centred it, leaving ~28px of transparent
+     * padding on the left. That gap was the misalignment with the bell — the
+     * margin was already right.
+     */
+    aspectRatio: 1761 / 681,
   },
   content: {
     padding: Spacing.four,

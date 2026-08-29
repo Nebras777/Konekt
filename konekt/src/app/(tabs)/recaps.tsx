@@ -7,7 +7,7 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
+import { AccentList, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
 import type { DaySummary } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -280,9 +280,9 @@ function InboxRecap({
       ) : null}
 
       <View style={styles.statsRow}>
-        <Stat label="km" value={summary.distanceKm?.toFixed(1) ?? '—'} />
-        <Stat label="stops" value={String(summary.places.length)} />
-        <Stat label="photos" value={String(photoCount)} />
+        <Stat label="km" value={summary.distanceKm?.toFixed(1) ?? '—'} accent={AccentList[0]} />
+        <Stat label="stops" value={String(summary.places.length)} accent={AccentList[1]} />
+        <Stat label="photos" value={String(photoCount)} accent={AccentList[2]} />
       </View>
 
       {summary.locationHidden ? (
@@ -313,10 +313,12 @@ function InboxRecap({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
     <ThemedView type="backgroundSelected" style={styles.statTile}>
-      <ThemedText type="subtitle">{value}</ThemedText>
+      <ThemedText type="subtitle" style={{ color: accent }}>
+        {value}
+      </ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
         {label}
       </ThemedText>
@@ -393,7 +395,7 @@ const styles = StyleSheet.create({
   saveChip: {
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.30)',
+    borderColor: 'rgba(255,232,61,0.75)',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },

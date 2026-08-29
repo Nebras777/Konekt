@@ -8,7 +8,7 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { accentFor, BottomTabInset, Spacing } from '@/constants/theme';
 import type { DaySummary } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -140,7 +140,12 @@ function DayAccordion({
       <Pressable onPress={onToggle} accessibilityRole="button" accessibilityState={{ expanded }}>
         {({ pressed }) => (
           <ThemedView type="backgroundElement" style={[styles.dayButton, pressed && styles.pressed]}>
-            <ThemedText type="smallBold">{formatDate(group.date)}</ThemedText>
+            <View style={styles.dateLabel}>
+              <View style={[styles.dateDot, { backgroundColor: accentFor(group.date) }]} />
+              <ThemedText type="smallBold" style={{ color: accentFor(group.date) }}>
+                {formatDate(group.date)}
+              </ThemedText>
+            </View>
             <ThemedText themeColor="textSecondary">{expanded ? '▾' : '▸'}</ThemedText>
           </ThemedView>
         )}
@@ -223,6 +228,16 @@ function Message({ text }: { text: string }) {
 }
 
 const styles = StyleSheet.create({
+  dateLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  dateDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
   container: {
     flex: 1,
   },
