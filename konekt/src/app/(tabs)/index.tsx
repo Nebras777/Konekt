@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -46,6 +47,7 @@ const TODAY_PLACES: PlaceVisit[] = [
     subtitle: 'Leg day',
   },
 ];
+import { mockRoute } from '@/constants/mockRoute';
 
 export default function TodayScreen() {
   const router = useRouter();
@@ -54,6 +56,8 @@ export default function TodayScreen() {
     km: TODAY_DISTANCE_KM.toFixed(1),
     stops: String(TODAY_PLACES.length),
     photos: String(TODAY_PLACES.filter((place) => place.photoUrl).length),
+    stops: String(mockRoute.length),
+    photos: String(mockRoute.filter((place) => place.photoUrl).length),
   };
 
   return (
@@ -66,12 +70,21 @@ export default function TodayScreen() {
 
           <View style={styles.statsRow}>
             <Stat label="km" value={stats.km} />
+        <Image
+          source={require('@/assets/images/logo-wordmark.png')}
+          style={styles.logo}
+          contentFit="contain"
+        />
+
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.statsRow}>
             <Stat label="stops" value={stats.stops} />
             <Stat label="photos" value={stats.photos} />
           </View>
 
           <View style={styles.stopsList}>
             {TODAY_PLACES.map((place, index) => (
+            {mockRoute.map((place, index) => (
               <DayCard
                 key={`${place.name}-${index}`}
                 time={place.time}
@@ -121,6 +134,9 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: Spacing.two,
+  },
+  content: {
+    gap: Spacing.four,
   },
   statsRow: {
     flexDirection: 'row',
