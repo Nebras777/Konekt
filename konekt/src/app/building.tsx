@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 import { setDraftRecap } from '../../services/draftRecap';
 import { buildDayRecap } from '../../services/sendRecap';
+import { getTodayPlaces } from '../../services/todayDraft';
 
 const STEPS = [
   'Gathering today’s stops',
@@ -50,7 +51,9 @@ export default function BuildingScreen() {
       ),
     );
 
-    buildDayRecap(routeRef.current)
+    // Prefer the draft handed over from the Today screen (it carries any
+    // attached media); fall back to the live captured route.
+    buildDayRecap(getTodayPlaces() ?? routeRef.current)
       .then((summary) => {
         if (cancelled) return;
         setCompletedCount(STEPS.length);

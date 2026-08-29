@@ -32,7 +32,14 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Konekt needs access to your photos so you can attach one to a stop."
+        }
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
