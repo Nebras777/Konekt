@@ -9,20 +9,16 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#25232B',
-    background: '#F8F7FC',
-    /**
-     * Cards are a soft grey with a violet cast, not pure grey — a neutral grey
-     * next to a violet-tinted background reads as dirty. Grey also separates
-     * from the near-white page far better than white did.
-     */
-    backgroundElement: '#ECEAF3',
-    /**
-     * Selected and pressed. Deepened from the palette's lavender: against grey
-     * cards the original was too close in lightness to register as selected.
-     */
-    backgroundSelected: '#DCD6F8',
-    textSecondary: '#777380',
+    /** Near-white with a violet cast, matching the tint of the surfaces. */
+    text: '#F4F3F8',
+    /** The page behind the cards — darker than them, so cards read as raised. */
+    background: '#1B1A21',
+    /** Cards: dark grey, a step lighter than the page. */
+    backgroundElement: '#2E2C38',
+    /** Selected and pressed: lifted toward the violet primary. */
+    backgroundSelected: '#413C58',
+    textSecondary: '#A6A2B3',
+    /** The palette's violet, which carries well on a dark ground. */
     primary: '#7C6EE6',
   },
 } as const;
@@ -30,21 +26,16 @@ export const Colors = {
 /** The darker primary, for pressed states and emphasis. */
 export const PrimaryDark = '#5B4BC4';
 
-/**
- * Solid surface for the tab bar. Matches the cards rather than staying white,
- * so the bar reads as part of the same set of surfaces.
- */
-export const TabBarSurface = '#ECEAF3';
+/** Solid surface for the tab bar. Native bars render alpha unreliably. */
+export const TabBarSurface = '#2E2C38';
 
 /**
- * Background gradient: the background colour easing into lavender.
+ * Background gradient: near-black easing to the palette's darkest grey.
  *
- * Kept very shallow. With a near-white ground and white cards, a strong
- * gradient would swamp the small amount of contrast holding the two apart —
- * this reads as a tint rather than a wash. Set all three stops to the
- * background colour for a flat background instead.
+ * Shallow on purpose. The contrast that matters here is between the page and
+ * the cards sitting on it; a strong background gradient competes with that.
  */
-export const BackgroundGradient = ['#F8F7FC', '#F1EEFB', '#E9E6FF'] as const;
+export const BackgroundGradient = ['#25232B', '#1E1C24', '#17161D'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -77,15 +68,11 @@ export const Danger = {
 } as const;
 
 export const Surface = {
-  /**
-   * Lighter than it was for white cards: grey surfaces separate from the page
-   * on their own, so the edge only needs to define them rather than carry the
-   * whole distinction.
-   */
-  border: 'rgba(37,35,43,0.07)',
-  borderStrong: 'rgba(37,35,43,0.14)',
-  /** Violet-tinted, so shadows sit in the palette rather than greying it. */
-  shadow: 'rgba(91,75,196,0.16)',
+  /** A light edge now: on dark surfaces a dark border is invisible. */
+  border: 'rgba(255,255,255,0.10)',
+  /** Brighter on top, so a card looks lit from above rather than cut out. */
+  borderStrong: 'rgba(255,255,255,0.20)',
+  shadow: 'rgba(0,0,0,0.45)',
   borderWidth: 1,
 } as const;
 
@@ -103,7 +90,7 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['#ECEAF3', '#EFEDF5', '#EAE8F1', '#F1EFF7'] as const;
+const CARD_TINTS = ['#2E2C38', '#322F3C', '#2B2934', '#353140'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];
