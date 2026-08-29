@@ -137,3 +137,24 @@ export type Reaction = {
   /** False until the recap's author has seen it in their activity list. */
   seen: boolean;
 };
+
+/**
+ * A short message between two connected people, separate from a full recap.
+ *
+ * 'okay'    — "I'm fine", sent without stops, map or AI summary. Most days
+ *             there is nothing to report and the point is only reassurance.
+ * 'checkin' — "thinking of you, share when you can", sent by someone who
+ *             receives recaps. It is a request, never a demand: it notifies the
+ *             other person and they decide whether to answer.
+ */
+export type PingKind = 'okay' | 'checkin';
+
+export type Ping = {
+  id: string;
+  kind: PingKind;
+  fromId: string;
+  fromName: string;
+  toId: string;
+  createdAt: number;
+  seen: boolean;
+};

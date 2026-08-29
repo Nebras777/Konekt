@@ -22,6 +22,8 @@ import {
   updateContactGroup,
   updateContactStatus,
 } from '../../../services/contacts';
+import { getPingsFrom, sendPing } from '../../../services/pings';
+import { getInbox } from '../../../services/firestore';
 import { getProfiles } from '../../../services/profiles';
 
 const GROUPS: { value: ConnectionGroup; label: string }[] = [
@@ -108,6 +110,9 @@ export default function PeopleScreen() {
   const [incoming, setIncoming] = useState<Connection[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [inviting, setInviting] = useState<string | null>(null);
+  const [nudging, setNudging] = useState<string | null>(null);
+  /** profileId -> when that person last shared anything with you. */
+  const [lastHeard, setLastHeard] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -117,14 +122,36 @@ export default function PeopleScreen() {
     }
     setError(null);
     try {
-      const [mine, invites, everyone] = await Promise.all([
+      const [mine, invites, everyone, inbox] = await Promise.all([
         getContacts(profile.id),
         getIncomingInvites(profile.id),
         getProfiles(),
+        getInbox(profile.id),
       ]);
       setContacts(mine);
       setIncoming(invites);
       setProfiles(everyone);
+
+      // When did each person last share with you? A recap and an "I'm okay"
+      // both count — the question is "have I heard from them", not "did they
+      // send a full recap".
+      const latest: Record<string, number> = {};
+      for (const summary of inbox) {
+        latest[summary.userId] = Math.max(latest[summary.userId] ?? 0, summary.createdAt);
+      }
+      const pingLists = await Promise.all(
+        invites
+          .filter((c) => c.status === 'active' && c.ownerId)
+          .map((c) => getPingsFrom(c.ownerId as string)),
+      );
+      for (const pings of pingLists) {
+        for (const ping of pings) {
+          if (ping.toId === profile.id && ping.kind === 'okay') {
+            latest[ping.fromId] = Math.max(latest[ping.fromId] ?? 0, ping.createdAt);
+          }
+        }
+      }
+      setLastHeard(latest);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load people');
       setContacts([]);
@@ -197,6 +224,41 @@ export default function PeopleScreen() {
     return live?.name ?? connection.ownerName ?? 'Someone';
   }
 
+  /** "3 days ago", or null if they've never shared. */
+  function heardFrom(ownerId?: string): string | null {
+    if (!ownerId) return null;
+    const at = lastHeard[ownerId];
+    if (!at) return null;
+    const days = Math.floor((Date.now() - at) / 86_400_000);
+    if (days === 0) return 'today';
+    if (days === 1) return 'yesterday';
+    return `${days} days ago`;
+  }
+
+  /**
+   * Ask someone to share when they can. A request, not a demand: it notifies
+   * them and they decide whether to answer.
+   */
+  const nudge = useCallback(
+    async (connection: Connection) => {
+      if (!profile || !connection.ownerId) return;
+      setNudging(connection.id);
+      try {
+        await sendPing({
+          kind: 'checkin',
+          fromId: profile.id,
+          fromName: profile.name,
+          toId: connection.ownerId,
+        });
+      } catch {
+        setError('Could not send that check-in');
+      } finally {
+        setNudging(null);
+      }
+    },
+    [profile],
+  );
+
   const pendingIncoming = incoming.filter((c) => c.status === 'pending');
   // Invites you've accepted: these people's recaps arrive in your Recaps tab.
   const sharingWithYou = incoming.filter((c) => c.status === 'active');
@@ -254,11 +316,29 @@ export default function PeopleScreen() {
           <View style={styles.list}>
             <ThemedText type="smallBold">Sharing with you</ThemedText>
             {sharingWithYou.map((connection) => (
-              <ThemedView key={connection.id} type="backgroundElement" style={styles.inviteRow}>
-                <ThemedText type="smallBold">{inviterName(connection)}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
-                  Their recaps arrive in Recaps
-                </ThemedText>
+              <ThemedView key={connection.id} type="backgroundElement" style={styles.sharingRow}>
+                <View style={styles.sharingText}>
+                  <ThemedText type="smallBold">{inviterName(connection)}</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {heardFrom(connection.ownerId)
+                      ? `Last shared ${heardFrom(connection.ownerId)}`
+                      : "Hasn't shared yet"}
+                  </ThemedText>
+                </View>
+                <Pressable
+                  onPress={() => nudge(connection)}
+                  disabled={nudging === connection.id}
+                  accessibilityRole="button">
+                  {({ pressed }) => (
+                    <ThemedView
+                      type="backgroundSelected"
+                      style={[styles.inviteChip, pressed && styles.pressed]}>
+                      <ThemedText type="small">
+                        {nudging === connection.id ? 'Sent' : 'Check in?'}
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+                </Pressable>
               </ThemedView>
             ))}
           </View>
@@ -359,6 +439,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.half,
     borderRadius: Spacing.three,
+  },
+  sharingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+    borderRadius: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+  },
+  sharingText: {
+    flexShrink: 1,
+    gap: Spacing.half,
   },
   respondRow: {
     flexDirection: 'row',
