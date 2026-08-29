@@ -70,9 +70,15 @@ function ContactRow({
       </ThemedView>
       <View style={styles.rowText}>
         <ThemedText type="smallBold">{name}</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {RELATIONSHIP_LABEL[relationship] ?? relationship}
-        </ThemedText>
+        {/* Only shown when it says something. Inviting a Konekt profile doesn't
+            ask how you know the person, so it defaults to 'other' — printing
+            that under every invited name is noise, and the Family / Friends /
+            Other chips already cover the filing. */}
+        {relationship && relationship !== 'other' ? (
+          <ThemedText type="small" themeColor="textSecondary">
+            {RELATIONSHIP_LABEL[relationship] ?? relationship}
+          </ThemedText>
+        ) : null}
       </View>
 
       <View style={styles.rowRight}>
