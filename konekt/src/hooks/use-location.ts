@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { PlaceType, PlaceVisit } from '@/constants/types';
 
@@ -15,9 +16,78 @@ import type { PlaceType, PlaceVisit } from '@/constants/types';
  * screen's Start/Stop control, and will be added once that exists so both sides
  * are built to the same interface.
  *
- * The returned point is shaped as a PlaceVisit, so it drops straight into a
- * route array and RouteMap plots it with no changes.
+ * Captured points are shaped as PlaceVisit, so they drop straight into a route
+ * array and RouteMap plots them with no changes.
+ *
+ * Points live in a module-level store rather than component state, so they
+ * survive navigating away from a screen and back — every caller of this hook
+ * sees the same list. The store is mirrored to AsyncStorage, so they also
+ * survive an app restart or a Metro reload. That matters when the route is
+ * built by actually walking to places: losing an afternoon's captures to a
+ * Fast Refresh would be worse than not having the feature.
  */
+
+/** AsyncStorage key holding the captured points. */
+const STORAGE_KEY = 'konekt.capturedPoints.v1';
+
+/**
+ * Module-level store. Component state is discarded when a screen unmounts, so
+ * anything held there is lost the moment the user navigates away.
+ */
+let capturedPoints: PlaceVisit[] = [];
+const listeners = new Set<() => void>();
+
+function emit() {
+  listeners.forEach((listener) => listener());
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** Must return a stable reference between changes, or useSyncExternalStore loops. */
+function getSnapshot(): PlaceVisit[] {
+  return capturedPoints;
+}
+
+/** Replaces the store and mirrors it to disk. Persistence is best-effort. */
+function setCapturedPoints(next: PlaceVisit[]) {
+  capturedPoints = next;
+  emit();
+  void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {
+    // A failed write costs persistence, not the in-memory points. Don't throw
+    // in the middle of a capture the user is watching.
+  });
+}
+
+/** Runs once per app launch; later mounts reuse whatever is already in memory. */
+let hydration: Promise<void> | null = null;
+
+function hydrate(): Promise<void> {
+  hydration ??= (async () => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return;
+      }
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return;
+      }
+      // Anything already captured this session wins over the stored copy.
+      if (capturedPoints.length === 0) {
+        capturedPoints = parsed as PlaceVisit[];
+        emit();
+      }
+    } catch {
+      // Corrupt or unreadable storage shouldn't stop the hook working.
+    }
+  })();
+  return hydration;
+}
 
 /** Used when reverse geocoding gives us nothing usable. */
 const FALLBACK_NAME = 'Current location';
@@ -37,6 +107,8 @@ export type LocationStatus =
   | 'error';
 
 export type UseLocation = {
+  /** Every point captured so far, oldest first. Survives navigation. */
+  points: PlaceVisit[];
   /** The most recent point captured, or null. */
   place: PlaceVisit | null;
   status: LocationStatus;
@@ -46,7 +118,7 @@ export type UseLocation = {
   isLoading: boolean;
   /** Capture the current position. Resolves with the point, or null on failure. */
   refresh: () => Promise<PlaceVisit | null>;
-  /** Discard the captured point. */
+  /** Discard every captured point. */
   clear: () => void;
 };
 
@@ -63,7 +135,7 @@ export type UseLocationOptions = {
 };
 
 /**
- * Formats to match mockRoute's display style, e.g. "7:50 AM".
+ * Formats for display, e.g. "7:50 AM".
  * Done by hand rather than via toLocaleTimeString so the output can't drift
  * with device locale — a 24-hour phone would otherwise render "07:50".
  */
@@ -96,8 +168,10 @@ export function useLocation(options: UseLocationOptions = {}): UseLocation {
     reverseGeocode = true,
   } = options;
 
-  const [place, setPlace] = useState<PlaceVisit | null>(null);
-  const [status, setStatus] = useState<LocationStatus>('idle');
+  const points = useSyncExternalStore(subscribe, getSnapshot);
+  const [status, setStatus] = useState<LocationStatus>(() =>
+    capturedPoints.length > 0 ? 'ready' : 'idle',
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Guards every setState below: a fix can land after the screen has gone.
@@ -107,6 +181,15 @@ export function useLocation(options: UseLocationOptions = {}): UseLocation {
     return () => {
       mounted.current = false;
     };
+  }, []);
+
+  // Pull previously captured points back in on first mount after a launch.
+  useEffect(() => {
+    void hydrate().then(() => {
+      if (mounted.current && capturedPoints.length > 0) {
+        setStatus((prev) => (prev === 'idle' ? 'ready' : prev));
+      }
+    });
   }, []);
 
   const refresh = useCallback(async (): Promise<PlaceVisit | null> => {
@@ -160,8 +243,11 @@ export function useLocation(options: UseLocationOptions = {}): UseLocation {
         time: formatTime(location.timestamp),
       };
 
+      // Append to the shared store rather than local state, so the point is
+      // still here after the user navigates away and comes back.
+      setCapturedPoints([...capturedPoints, captured]);
+
       if (mounted.current) {
-        setPlace(captured);
         setStatus('ready');
       }
       return captured;
@@ -175,13 +261,14 @@ export function useLocation(options: UseLocationOptions = {}): UseLocation {
   }, [accuracy, reverseGeocode, type]);
 
   const clear = useCallback(() => {
-    setPlace(null);
+    setCapturedPoints([]);
     setStatus('idle');
     setError(null);
   }, []);
 
   return {
-    place,
+    points,
+    place: points.length > 0 ? points[points.length - 1] : null,
     status,
     error,
     isLoading: status === 'loading',
