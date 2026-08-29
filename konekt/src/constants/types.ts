@@ -47,6 +47,13 @@ export const DEMO_USERS = {
 
 export type ConnectionStatus = 'pending' | 'active' | 'declined';
 
+/**
+ * How the user files a connection. Deliberately coarser than
+ * ConnectionRelationship: the Privacy screen shares by group ("share location
+ * with family"), which a six-way relationship can't answer cleanly.
+ */
+export type ConnectionGroup = 'family' | 'friends' | 'other';
+
 export type ConnectionRelationship =
   | 'parent'
   | 'grandparent'
@@ -63,6 +70,8 @@ export type Connection = {
   phone?: string;
   relationship: ConnectionRelationship;
   status: ConnectionStatus;
+  /** Family / Friends / Other, set by the owner. Defaults to 'other' when unset. */
+  group?: ConnectionGroup;
   /** Profile that created this connection — the person who sent the invite. */
   ownerId?: string;
   /**

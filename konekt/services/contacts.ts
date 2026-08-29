@@ -2,6 +2,7 @@ import { addDoc, collection, doc, getDocs, query, updateDoc, where } from 'fireb
 import { db } from './firebaseConfig';
 import type {
   Connection,
+  ConnectionGroup,
   ConnectionRelationship,
   ConnectionStatus,
 } from '../src/constants/types';
@@ -18,6 +19,9 @@ export async function addContact(
   const ref = await addDoc(collection(db, COLLECTION), {
     ...contact,
     status: contact.status ?? 'pending',
+    // Written explicitly rather than left undefined: a Firestore where('group')
+    // query skips documents that lack the field entirely.
+    group: contact.group ?? 'other',
   });
   return ref.id;
 }
@@ -54,6 +58,7 @@ export async function inviteProfile(params: {
     profileId: params.profileId,
     name: params.name,
     relationship: params.relationship ?? 'other',
+    group: 'other' as ConnectionGroup,
     status: 'pending' as ConnectionStatus,
   });
   return ref.id;
@@ -85,4 +90,12 @@ export async function updateContactStatus(
   status: ConnectionStatus,
 ): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status });
+}
+
+/**
+ * File a connection under Family, Friends or Other. Only the owner of a
+ * connection can group it — it's their own filing, not a label on the person.
+ */
+export async function updateContactGroup(id: string, group: ConnectionGroup): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, id), { group });
 }

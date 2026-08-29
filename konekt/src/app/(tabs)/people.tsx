@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import type {
   Connection,
+  ConnectionGroup,
   ConnectionRelationship,
   ConnectionStatus,
   Profile,
@@ -18,9 +19,16 @@ import {
   getContacts,
   getIncomingInvites,
   inviteProfile,
+  updateContactGroup,
   updateContactStatus,
 } from '../../../services/contacts';
 import { getProfiles } from '../../../services/profiles';
+
+const GROUPS: { value: ConnectionGroup; label: string }[] = [
+  { value: 'family', label: 'Family' },
+  { value: 'friends', label: 'Friends' },
+  { value: 'other', label: 'Other' },
+];
 
 const RELATIONSHIP_LABEL: Record<ConnectionRelationship, string> = {
   parent: 'Parent',
@@ -43,10 +51,17 @@ function initials(name: string) {
 
 /**
  * A connection you created. Status is read-only here: only the invited person
- * can accept, from their own account.
+ * can accept, from their own account. The group is yours to set.
  */
-function ContactRow({ contact }: { contact: Connection }) {
+function ContactRow({
+  contact,
+  onSetGroup,
+}: {
+  contact: Connection;
+  onSetGroup: (group: ConnectionGroup) => void;
+}) {
   const { name, relationship, status } = contact;
+  const group = contact.group ?? 'other';
 
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
@@ -60,9 +75,28 @@ function ContactRow({ contact }: { contact: Connection }) {
         </ThemedText>
       </View>
 
-      <ThemedText type="small" themeColor="textSecondary">
-        {status === 'pending' ? 'Invite sent' : (STATUS_LABEL[status] ?? status)}
-      </ThemedText>
+      <View style={styles.rowRight}>
+        <View style={styles.groupRow}>
+          {GROUPS.map(({ value, label }) => (
+            <Pressable
+              key={value}
+              onPress={() => onSetGroup(value)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: group === value }}>
+              {({ pressed }) => (
+                <ThemedView
+                  type={group === value ? 'backgroundSelected' : 'backgroundElement'}
+                  style={[styles.groupChip, pressed && styles.pressed]}>
+                  <ThemedText type="small">{label}</ThemedText>
+                </ThemedView>
+              )}
+            </Pressable>
+          ))}
+        </View>
+        <ThemedText type="small" themeColor="textSecondary">
+          {status === 'pending' ? 'Invite sent' : (STATUS_LABEL[status] ?? status)}
+        </ThemedText>
+      </View>
     </ThemedView>
   );
 }
@@ -114,6 +148,19 @@ export default function PeopleScreen() {
         await updateContactStatus(id, status);
       } catch {
         load(); // fall back to the stored state if the write failed
+      }
+    },
+    [load],
+  );
+
+  const handleSetGroup = useCallback(
+    async (id: string, group: ConnectionGroup) => {
+      // Optimistic: filing someone should feel instant.
+      setContacts((prev) => prev?.map((c) => (c.id === id ? { ...c, group } : c)) ?? prev);
+      try {
+        await updateContactGroup(id, group);
+      } catch {
+        load(); // reload the stored state if the write failed
       }
     },
     [load],
@@ -228,7 +275,11 @@ export default function PeopleScreen() {
         ) : (
           <View style={styles.list}>
             {contacts.map((contact) => (
-              <ContactRow key={contact.id} contact={contact} />
+              <ContactRow
+                key={contact.id}
+                contact={contact}
+                onSetGroup={(group) => handleSetGroup(contact.id, group)}
+              />
             ))}
           </View>
         )}
@@ -295,6 +346,19 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
+  },
+  rowRight: {
+    alignItems: 'flex-end',
+    gap: Spacing.one,
+  },
+  groupRow: {
+    flexDirection: 'row',
+    gap: Spacing.one,
+  },
+  groupChip: {
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.half,
+    borderRadius: Spacing.three,
   },
   respondRow: {
     flexDirection: 'row',
