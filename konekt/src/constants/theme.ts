@@ -162,8 +162,10 @@ export const Spacing = {
 /**
  * Space a screen must leave at the bottom so its content clears the tab bar.
  *
- * The bar floats now — 54 tall, sitting 18 above the screen edge — so content
- * scrolling underneath it would otherwise be hidden rather than merely tight.
+ * The bar floats now — 62 tall, sitting above the device's own navigation bar —
+ * so content scrolling underneath it would be hidden rather than merely tight.
+ * Generous on purpose: the exact offset depends on the device's safe area,
+ * which a constant can't know.
  */
-export const BottomTabInset = 84;
+export const BottomTabInset = 118;
 export const MaxContentWidth = 800;

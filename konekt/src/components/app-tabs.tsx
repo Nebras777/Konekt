@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router/js-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Radii, Surface } from '@/constants/theme';
 
@@ -12,6 +13,10 @@ import { Colors, Radii, Surface } from '@/constants/theme';
  */
 export default function AppTabs() {
   const colors = Colors.light;
+  // Android's gesture/navigation bar sits below the screen edge. Positioning
+  // the floating bar from the edge alone puts it behind that, which is what
+  // made the labels hard to read.
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -31,13 +36,15 @@ export default function AppTabs() {
         },
         tabBarItemStyle: {
           paddingVertical: 0,
+          height: 62,
+          justifyContent: 'center',
         },
         tabBarStyle: {
           position: 'absolute',
           left: 14,
           right: 14,
-          bottom: 18,
-          height: 54,
+          bottom: insets.bottom + 12,
+          height: 62,
           paddingTop: 0,
           paddingBottom: 0,
           borderRadius: Radii.pill,
