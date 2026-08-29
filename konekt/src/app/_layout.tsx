@@ -13,6 +13,10 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="recap/[id]" options={{ title: 'Recap' }} />
         <Stack.Screen name="building" options={{ title: 'Building' }} />
+        <Stack.Screen
+          name="add-person"
+          options={{ title: 'Add person', presentation: 'modal' }}
+        />
       </Stack>
     </ThemeProvider>
   );
