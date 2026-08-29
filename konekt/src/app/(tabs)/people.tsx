@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenTitle } from '@/components/screen-title';
@@ -236,6 +236,10 @@ export default function PeopleScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ScreenTitle accent={Accents.cyan}>People</ScreenTitle>
 
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
         {pendingIncoming.length > 0 ? (
           <View style={styles.list}>
             <ThemedText type="smallBold">Invites for you</ThemedText>
@@ -353,6 +357,7 @@ export default function PeopleScreen() {
             ))}
           </View>
         ) : null}
+        </ScrollView>
       </SafeAreaView>
     </ThemedView>
   );
@@ -376,8 +381,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.five,
-    paddingBottom: BottomTabInset + Spacing.three,
     gap: Spacing.four,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    gap: Spacing.four,
+    paddingBottom: BottomTabInset + Spacing.four,
   },
   centre: {
     flex: 1,
