@@ -1,62 +1,108 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { DayCard } from '@/components/DayCard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, Spacing } from '@/constants/theme';
+import type { PlaceVisit } from '@/constants/types';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+const TODAY_DISTANCE_KM = 4.6;
 
-export default function HomeScreen() {
+const TODAY_PLACES: PlaceVisit[] = [
+  {
+    name: 'Home',
+    type: 'home',
+    lat: 40.7128,
+    lng: -74.006,
+    time: '8:10 AM',
+    subtitle: 'Left for campus',
+  },
+  {
+    name: 'Fischer Library',
+    type: 'study',
+    lat: 40.7295,
+    lng: -73.9965,
+    time: '9:00 AM',
+    subtitle: 'Studied for 3 hours',
+    photoUrl: 'https://picsum.photos/seed/library/400/400',
+  },
+  {
+    name: 'Sunrise Diner',
+    type: 'food',
+    lat: 40.731,
+    lng: -73.99,
+    time: '12:30 PM',
+    subtitle: 'Lunch with friends',
+    photoUrl: 'https://picsum.photos/seed/diner/400/400',
+  },
+  {
+    name: 'City Gym',
+    type: 'gym',
+    lat: 40.733,
+    lng: -73.985,
+    time: '4:15 PM',
+    subtitle: 'Leg day',
+  },
+];
+
+export default function TodayScreen() {
+  const router = useRouter();
+
+  const stats = {
+    km: TODAY_DISTANCE_KM.toFixed(1),
+    stops: String(TODAY_PLACES.length),
+    photos: String(TODAY_PLACES.filter((place) => place.photoUrl).length),
+  };
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
+        <ScrollView contentContainerStyle={styles.content}>
           <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+            Today
           </ThemedText>
-        </ThemedView>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          <View style={styles.statsRow}>
+            <Stat label="km" value={stats.km} />
+            <Stat label="stops" value={stats.stops} />
+            <Stat label="photos" value={stats.photos} />
+          </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+          <View style={styles.stopsList}>
+            {TODAY_PLACES.map((place, index) => (
+              <DayCard
+                key={`${place.name}-${index}`}
+                time={place.time}
+                title={place.name}
+                subtitle={place.subtitle}
+              />
+            ))}
+          </View>
+        </ScrollView>
 
-        {Platform.OS === 'web' && <WebBadge />}
+        <Pressable onPress={() => router.push('/building')} accessibilityRole="button">
+          {({ pressed }) => (
+            <ThemedView
+              type="backgroundSelected"
+              style={[styles.recapButton, pressed && styles.pressed]}>
+              <ThemedText type="smallBold">Make today&apos;s recap</ThemedText>
+            </ThemedView>
+          )}
+        </Pressable>
       </SafeAreaView>
+    </ThemedView>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <ThemedView type="backgroundElement" style={styles.statTile}>
+      <ThemedText type="subtitle">{value}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {label}
+      </ThemedText>
     </ThemedView>
   );
 }
@@ -64,35 +110,40 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    paddingBottom: BottomTabInset,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  content: {
+    padding: Spacing.four,
     gap: Spacing.four,
   },
   title: {
-    textAlign: 'center',
+    marginBottom: Spacing.two,
   },
-  code: {
-    textTransform: 'uppercase',
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
+  statTile: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.three,
+    gap: Spacing.half,
+  },
+  stopsList: {
+    gap: Spacing.two,
+  },
+  recapButton: {
+    marginHorizontal: Spacing.four,
+    marginTop: Spacing.two,
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
     borderRadius: Spacing.four,
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });
