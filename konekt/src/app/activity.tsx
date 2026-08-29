@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   list: { gap: Spacing.two, paddingBottom: Spacing.four },
   row: {
     flexDirection: 'row',
-    borderWidth: 1,
+    borderWidth: Surface.borderWidth,
     borderColor: Surface.border,
     borderTopColor: Surface.borderStrong,
     alignItems: 'center',

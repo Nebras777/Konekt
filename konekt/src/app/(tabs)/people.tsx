@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: Radii.lg,
-    borderWidth: 1,
+    borderWidth: Surface.borderWidth,
     borderColor: Surface.border,
     borderTopColor: Surface.borderStrong,
     paddingHorizontal: Spacing.three,

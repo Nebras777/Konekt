@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: Radii.xl,
-    borderWidth: 1,
+    borderWidth: Surface.borderWidth,
     borderColor: Surface.border,
     borderTopColor: Surface.borderStrong,
     paddingHorizontal: Spacing.three,

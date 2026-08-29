@@ -10,7 +10,7 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Accents, Danger, Radii, Spacing, Surface } from '@/constants/theme';
+import { AccentList, Danger, Radii, Spacing, Surface } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useTheme } from '@/hooks/use-theme';
@@ -144,9 +144,9 @@ export default function TodayScreen() {
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
-            <Stat label="km" value={stats.km} accent={Accents.teal} tilt="-1.5deg" />
-            <Stat label="stops" value={stats.stops} accent={Accents.tangerine} tilt="1deg" />
-            <Stat label="photos" value={stats.photos} accent={Accents.grape} tilt="-0.8deg" />
+            <Stat label="km" value={stats.km} accent={AccentList[0]} tilt="-1.5deg" />
+            <Stat label="stops" value={stats.stops} accent={AccentList[1]} tilt="1deg" />
+            <Stat label="photos" value={stats.photos} accent={AccentList[2]} tilt="-0.8deg" />
           </View>
 
           {isEmpty ? (
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
     backgroundColor: Danger.fill,
-    borderWidth: 1,
+    borderWidth: Surface.borderWidth,
     borderColor: Danger.border,
     marginTop: Spacing.two,
   },
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   statTile: {
     flex: 1,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderRadius: Radii.lg,
     paddingVertical: Spacing.three,
     gap: Spacing.half,
@@ -344,6 +344,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
+    borderWidth: Surface.borderWidth,
+    borderColor: Surface.border,
   },
   pressed: {
     opacity: 0.7,

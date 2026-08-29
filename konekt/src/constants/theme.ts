@@ -9,36 +9,35 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Deep ink with a violet cast — reads as warm next to the peach, where a
-     *  neutral black would look sooty. */
-    text: '#241F3D',
+    /** Ink navy, not black — printed ink is never truly black. */
+    text: '#1E2749',
     /** Base colour, the gradient's first stop, so nothing flashes white. */
-    background: '#FFE3D3',
+    background: '#FFF3D6',
     /**
-     * Cards are white glass. On a light ground the gradient shows through just
-     * enough that cards higher up a screen pick up peach and lower ones
-     * periwinkle, so repeated cards vary without being given different colours.
+     * Cards are near-solid white with an ink outline, like stickers laid on
+     * paper — not glass. Glass was right on a dark ground; on warm paper an
+     * opaque card with a drawn edge is what reads as an object placed on top.
      */
-    backgroundElement: 'rgba(255,255,255,0.76)',
-    /** Selected and pressed: the same glass, brought closer to solid. */
-    backgroundSelected: 'rgba(255,255,255,0.96)',
-    textSecondary: 'rgba(36,31,61,0.60)',
+    backgroundElement: '#FFFDF8',
+    /** Selected and pressed: a wash of ink rather than more white. */
+    backgroundSelected: '#E7EAFF',
+    textSecondary: 'rgba(30,39,73,0.62)',
     /** Accent for switches. */
-    primary: '#7C5CFF',
+    primary: '#2D6BFF',
   },
 } as const;
 
 /** Solid surface for the tab bar. Native bars render alpha unreliably. */
-export const TabBarSurface = '#FFFFFF';
+export const TabBarSurface = '#FFFDF8';
 
 /**
- * Background gradient: peach into pink into periwinkle.
+ * Background gradient: buttercream into apricot into soft rose.
  *
- * A sunset, which is when someone would actually sit down and send their day.
- * Light on purpose — the two dark schemes before this needed heavy cards to
- * stay legible, and heavy cards are what made the app feel blocky.
+ * Warm paper rather than a colour wash — the palette's character comes from
+ * the ink outlines and the print-bright accents sitting on it, not from the
+ * background shouting.
  */
-export const BackgroundGradient = ['#FFE3D3', '#FFD6E7', '#E4E0FF'] as const;
+export const BackgroundGradient = ['#FFF3D6', '#FFE3C4', '#FFD6DC'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -48,12 +47,12 @@ export type ThemeColor = keyof typeof Colors.light;
  * than on the purple, which is where they all appear.
  */
 export const Accents = {
-  /** Saturated and candy-bright: on a pale ground, pastels would vanish. */
-  tangerine: '#FF7A45',
-  bubblegum: '#FF4D94',
-  grape: '#7C5CFF',
-  teal: '#00B8A9',
-  sunshine: '#FFB020',
+  /** Risograph inks: few colours, each fully saturated, none muddy. */
+  vermilion: '#FF5C39',
+  blue: '#2D6BFF',
+  green: '#00A86B',
+  magenta: '#FF3D9A',
+  yellow: '#FFB800',
 } as const;
 
 /**
@@ -63,18 +62,20 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: '#E5484D',
-  border: 'rgba(229,72,77,0.35)',
-  /** Text on the red fill. The theme's ink is dark, which would be unreadable. */
+  fill: '#FF3B30',
+  border: 'rgba(30,39,73,0.85)',
+  /** Text on the red fill. The theme's ink is dark and unreadable on it. */
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  /** A soft ink edge: on a light ground a white border would be invisible. */
-  border: 'rgba(36,31,61,0.10)',
-  borderStrong: 'rgba(255,255,255,0.85)',
-  /** Tinted rather than black, so shadows sit in the palette. */
-  shadow: 'rgba(120,80,140,0.22)',
+  /** A drawn ink edge, not a hairline. This is what makes a card an object. */
+  border: 'rgba(30,39,73,0.85)',
+  borderStrong: 'rgba(30,39,73,0.95)',
+  /** Ink-tinted, so shadows warm the paper rather than greying it. */
+  shadow: 'rgba(30,39,73,0.30)',
+  /** Outlines are drawn, so they need weight. */
+  borderWidth: 2,
 } as const;
 
 /** Corner radii, larger and softer than the old uniform 16. */
@@ -91,18 +92,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const SURFACE_ALPHAS = [0.72, 0.82, 0.76, 0.88] as const;
+const CARD_TINTS = ['#FFFDF8', '#FFFAF0', '#FDFBFF', '#FFF9F4'] as const;
 
 export function surfaceFor(index: number): string {
-  return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
+  return CARD_TINTS[index % CARD_TINTS.length];
 }
 
 export const AccentList = [
-  Accents.tangerine,
-  Accents.bubblegum,
-  Accents.grape,
-  Accents.teal,
-  Accents.sunshine,
+  Accents.vermilion,
+  Accents.blue,
+  Accents.green,
+  Accents.magenta,
+  Accents.yellow,
 ] as const;
 
 /**

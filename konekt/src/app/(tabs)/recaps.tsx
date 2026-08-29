@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   recapCard: {
     borderRadius: Radii.xl,
-    borderWidth: 1,
+    borderWidth: Surface.borderWidth,
     borderColor: Surface.border,
     borderTopColor: Surface.borderStrong,
     shadowColor: Surface.shadow,
