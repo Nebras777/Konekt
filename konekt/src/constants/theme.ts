@@ -11,10 +11,17 @@ export const Colors = {
   light: {
     text: '#25232B',
     background: '#F8F7FC',
-    /** Surface: cards are solid white against the near-white ground. */
-    backgroundElement: '#FFFFFF',
-    /** Lavender, for selected chips and pressed states. */
-    backgroundSelected: '#E9E6FF',
+    /**
+     * Cards are a soft grey with a violet cast, not pure grey — a neutral grey
+     * next to a violet-tinted background reads as dirty. Grey also separates
+     * from the near-white page far better than white did.
+     */
+    backgroundElement: '#ECEAF3',
+    /**
+     * Selected and pressed. Deepened from the palette's lavender: against grey
+     * cards the original was too close in lightness to register as selected.
+     */
+    backgroundSelected: '#DCD6F8',
     textSecondary: '#777380',
     primary: '#7C6EE6',
   },
@@ -23,8 +30,11 @@ export const Colors = {
 /** The darker primary, for pressed states and emphasis. */
 export const PrimaryDark = '#5B4BC4';
 
-/** Solid surface for the tab bar. Native bars render alpha unreliably. */
-export const TabBarSurface = '#FFFFFF';
+/**
+ * Solid surface for the tab bar. Matches the cards rather than staying white,
+ * so the bar reads as part of the same set of surfaces.
+ */
+export const TabBarSurface = '#ECEAF3';
 
 /**
  * Background gradient: the background colour easing into lavender.
@@ -68,11 +78,11 @@ export const Danger = {
 
 export const Surface = {
   /**
-   * White cards on a near-white ground have almost no contrast of their own,
-   * so the edge is what separates them. Tinted with the text colour rather
-   * than pure grey.
+   * Lighter than it was for white cards: grey surfaces separate from the page
+   * on their own, so the edge only needs to define them rather than carry the
+   * whole distinction.
    */
-  border: 'rgba(37,35,43,0.09)',
+  border: 'rgba(37,35,43,0.07)',
   borderStrong: 'rgba(37,35,43,0.14)',
   /** Violet-tinted, so shadows sit in the palette rather than greying it. */
   shadow: 'rgba(91,75,196,0.16)',
@@ -93,7 +103,7 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['#FFFFFF', '#FDFCFF', '#FBFAFF', '#FEFDFF'] as const;
+const CARD_TINTS = ['#ECEAF3', '#EFEDF5', '#EAE8F1', '#F1EFF7'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];
