@@ -9,22 +9,22 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Deep ink with a violet cast — reads as warm next to the peach, where a
-     *  neutral black would look sooty. */
-    text: '#241F3D',
+    /** The navy the wordmark ends on. Text and logo are then the same colour,
+     *  rather than the logo sitting on a palette it has nothing to do with. */
+    text: '#1B2447',
     /** Base colour, the gradient's first stop, so nothing flashes white. */
-    background: '#FFE3D3',
+    background: '#F0F4FE',
     /**
-     * Cards are white glass. On a light ground the gradient shows through just
-     * enough that cards higher up a screen pick up peach and lower ones
-     * periwinkle, so repeated cards vary without being given different colours.
+     * Cards are white and slightly translucent, so the wash shows faintly
+     * through — cards high on a screen pick up less tint and lower ones more,
+     * varying a list without giving cards different colours.
      */
-    backgroundElement: 'rgba(255,255,255,0.76)',
-    /** Selected and pressed: the same glass, brought closer to solid. */
-    backgroundSelected: 'rgba(255,255,255,0.96)',
-    textSecondary: 'rgba(36,31,61,0.60)',
-    /** Accent for switches. */
-    primary: '#7C5CFF',
+    backgroundElement: 'rgba(255,255,255,0.90)',
+    /** Selected and pressed: solid white. */
+    backgroundSelected: '#FFFFFF',
+    textSecondary: 'rgba(27,36,71,0.60)',
+    /** The mid-blue from the middle of the wordmark. */
+    primary: '#4A5FA8',
   },
 } as const;
 
@@ -32,13 +32,14 @@ export const Colors = {
 export const TabBarSurface = '#FFFFFF';
 
 /**
- * Background gradient: peach into pink into periwinkle.
+ * Background gradient: pale tints of the logo's own periwinkle.
  *
- * A sunset, which is when someone would actually sit down and send their day.
- * Light on purpose — the two dark schemes before this needed heavy cards to
- * stay legible, and heavy cards are what made the app feel blocky.
+ * The logo runs light periwinkle to deep navy. Using that gradient directly
+ * would mean a dark ground and white text; using tints of its light end keeps
+ * the brand's colour while leaving the navy free for text — so the wordmark
+ * reads as part of the app rather than pasted onto it.
  */
-export const BackgroundGradient = ['#FFE3D3', '#FFD6E7', '#E4E0FF'] as const;
+export const BackgroundGradient = ['#F0F4FE', '#DEE7FB', '#C6D4F4'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -48,12 +49,15 @@ export type ThemeColor = keyof typeof Colors.light;
  * accents disappear.
  */
 export const Accents = {
-  /** Saturated and candy-bright: on a pale ground, pastels would vanish. */
-  tangerine: '#FF7A45',
-  bubblegum: '#FF4D94',
-  grape: '#7C5CFF',
-  teal: '#00B8A9',
-  sunshine: '#FFB020',
+  /** Two taken straight from the logo's gradient... */
+  periwinkle: '#7C9BE8',
+  indigo: '#4A5FA8',
+  /** ...and three warm ones, because five shades of the same blue would make
+   *  stat tiles and avatars indistinguishable, and warm colours advance
+   *  against a cool ground where another blue would sink into it. */
+  coral: '#FF8A6B',
+  gold: '#FFC24D',
+  teal: '#2FBFAE',
 } as const;
 
 /**
@@ -70,11 +74,11 @@ export const Danger = {
 } as const;
 
 export const Surface = {
-  /** A soft ink edge: on a light ground a white border would be invisible. */
-  border: 'rgba(36,31,61,0.10)',
-  borderStrong: 'rgba(255,255,255,0.85)',
-  /** Tinted rather than black, so shadows sit in the palette. */
-  shadow: 'rgba(120,80,140,0.22)',
+  /** A hairline in the brand navy rather than a neutral grey. */
+  border: 'rgba(27,36,71,0.10)',
+  borderStrong: 'rgba(255,255,255,0.95)',
+  /** Blue-tinted, so shadows sit in the palette rather than greying it. */
+  shadow: 'rgba(40,60,120,0.16)',
   /** Hairline. A pale ground wants thin edges — a heavy outline fights it. */
   borderWidth: 1,
 } as const;
@@ -93,18 +97,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const SURFACE_ALPHAS = [0.72, 0.82, 0.76, 0.88] as const;
+const SURFACE_ALPHAS = [0.86, 0.94, 0.90, 0.98] as const;
 
 export function surfaceFor(index: number): string {
   return `rgba(255,255,255,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
 }
 
 export const AccentList = [
-  Accents.tangerine,
-  Accents.bubblegum,
-  Accents.grape,
+  Accents.periwinkle,
+  Accents.coral,
+  Accents.gold,
   Accents.teal,
-  Accents.sunshine,
+  Accents.indigo,
 ] as const;
 
 /**
