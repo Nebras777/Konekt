@@ -20,6 +20,11 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="clock.arrow.circlepath" md="history" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="memorylane">
+        <NativeTabs.Trigger.Label>Memories</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="photo.on.rectangle" md="photo_library" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="people">
         <NativeTabs.Trigger.Label>People</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.2.fill" md="people" />
