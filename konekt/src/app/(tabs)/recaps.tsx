@@ -7,7 +7,7 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
 import type { DaySummary } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 import { mediaForPlace } from '@/utils/placeMedia';
@@ -358,7 +358,15 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
   },
   recapCard: {
-    borderRadius: Spacing.four,
+    borderRadius: Radii.xl,
+    borderWidth: 1,
+    borderColor: Surface.border,
+    borderTopColor: Surface.borderStrong,
+    shadowColor: Surface.shadow,
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
     padding: Spacing.four,
     gap: Spacing.three,
   },
@@ -367,9 +375,9 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   filterChip: {
+    borderRadius: Radii.pill,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
-    borderRadius: Spacing.four,
   },
   titleRow: {
     flexDirection: 'row',
@@ -381,9 +389,9 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   saveChip: {
+    borderRadius: Radii.pill,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
-    borderRadius: Spacing.four,
   },
   reactionRow: {
     flexDirection: 'row',
@@ -397,9 +405,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,0,0,0.15)',
   },
   reactionChip: {
+    borderRadius: Radii.pill,
     alignItems: 'center',
     paddingVertical: Spacing.two,
-    borderRadius: Spacing.four,
   },
   noteCard: {
     borderRadius: Spacing.three,

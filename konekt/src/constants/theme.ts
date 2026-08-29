@@ -17,10 +17,15 @@ export const Colors = {
      * if the gradient can't draw, so it is never grey.
      */
     background: '#900CFF',
-    /** Cards: dark grey, so they read as raised against the vivid purple. */
-    backgroundElement: '#26262E',
-    /** Selected chips and pressed states — a lift from the card, not a new colour. */
-    backgroundSelected: '#3A3A45',
+    /**
+     * Cards are translucent dark rather than solid grey. Because the gradient
+     * shows through, a card near the top of a screen picks up more purple and
+     * one further down more magenta — so repeated cards vary on their own
+     * instead of tiling the same flat block forty times.
+     */
+    backgroundElement: 'rgba(26,26,34,0.66)',
+    /** Selected chips and pressed states: same surface, lifted. */
+    backgroundSelected: 'rgba(72,66,92,0.78)',
     /** Muted white. Grey secondary text would disappear on both surfaces. */
     textSecondary: '#B9BAC4',
     /** Accent for switches, picked from the gradient's bright end. */
@@ -50,6 +55,37 @@ export const Accents = {
   sky: '#4CC9F0',
   lilac: '#C77DFF',
 } as const;
+
+/**
+ * Hairline edges and depth for cards. A translucent surface needs a defined
+ * edge or it dissolves into the background; the light top border reads as the
+ * card catching light, which is what stops a flat rectangle looking cut out.
+ */
+export const Surface = {
+  border: 'rgba(255,255,255,0.14)',
+  borderStrong: 'rgba(255,255,255,0.22)',
+  shadow: 'rgba(0,0,0,0.35)',
+} as const;
+
+/** Corner radii, larger and softer than the old uniform 16. */
+export const Radii = {
+  sm: 10,
+  md: 18,
+  lg: 26,
+  xl: 34,
+  pill: 999,
+} as const;
+
+/**
+ * Slight per-card variation in how much gradient shows through. Repeated cards
+ * would otherwise all sit at the same opacity, which is the flatness this is
+ * meant to avoid.
+ */
+const SURFACE_ALPHAS = [0.6, 0.68, 0.63, 0.72] as const;
+
+export function surfaceFor(index: number): string {
+  return `rgba(26,26,34,${SURFACE_ALPHAS[index % SURFACE_ALPHAS.length]})`;
+}
 
 export const AccentList = [
   Accents.mint,

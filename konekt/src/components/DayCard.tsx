@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { accentFor, Spacing, tiltFor } from '@/constants/theme';
+import { accentFor, Radii, Spacing, Surface, surfaceFor, tiltFor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type DayCardProps = {
@@ -38,6 +38,7 @@ export function DayCard({
         {
           transform: [{ rotate: tiltFor(index) }],
           borderLeftColor: accentFor(title),
+          backgroundColor: surfaceFor(index),
         },
         excluded && styles.cardExcluded,
       ]}>
@@ -77,14 +78,27 @@ export function DayCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Spacing.three,
+    borderRadius: Radii.lg,
     padding: Spacing.three,
     gap: Spacing.two,
     // The accent lives on an edge rather than the fill, so the card stays
     // readable while still being identifiably "this stop".
     borderLeftWidth: 4,
+    // A translucent card needs a defined edge or it dissolves into the
+    // gradient behind it.
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderTopColor: Surface.borderStrong,
+    borderRightColor: Surface.border,
+    borderBottomColor: Surface.border,
     // Tilted cards would otherwise clip their neighbours' corners.
     marginHorizontal: Spacing.one,
+    shadowColor: Surface.shadow,
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   cardExcluded: {
     opacity: 0.5,

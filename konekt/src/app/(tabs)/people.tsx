@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { accentFor, BottomTabInset, Spacing } from '@/constants/theme';
+import { accentFor, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
 import type {
   Connection,
   ConnectionGroup,
@@ -400,9 +400,9 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   groupChip: {
+    borderRadius: Radii.pill,
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.half,
-    borderRadius: Spacing.three,
   },
   respondRow: {
     flexDirection: 'row',
@@ -410,9 +410,9 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   inviteChip: {
+    borderRadius: Radii.pill,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
-    borderRadius: Spacing.four,
   },
   list: {
     gap: Spacing.three,
@@ -424,9 +424,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    borderColor: Surface.border,
+    borderTopColor: Surface.borderStrong,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.four,
     gap: Spacing.three,
   },
   avatarText: {

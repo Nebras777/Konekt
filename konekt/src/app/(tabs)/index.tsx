@@ -9,7 +9,7 @@ import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Accents, BottomTabInset, Spacing } from '@/constants/theme';
+import { Accents, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
 import type { PlaceVisit } from '@/constants/types';
 import { useDayRoute } from '@/hooks/use-day-route';
 import { useAuth } from '@/hooks/use-auth';
@@ -292,12 +292,12 @@ const styles = StyleSheet.create({
   captureButton: {
     alignItems: 'center',
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.four,
+    borderRadius: Radii.pill,
   },
   endDayButton: {
     alignItems: 'center',
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.four,
+    borderRadius: Radii.pill,
     marginTop: Spacing.two,
   },
   safeArea: {
@@ -322,8 +322,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     borderWidth: 2,
+    borderRadius: Radii.lg,
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
     gap: Spacing.half,
   },
   stopsList: {

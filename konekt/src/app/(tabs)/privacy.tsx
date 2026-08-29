@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 
 import {
@@ -165,7 +165,10 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   card: {
-    borderRadius: Spacing.four,
+    borderRadius: Radii.xl,
+    borderWidth: 1,
+    borderColor: Surface.border,
+    borderTopColor: Surface.borderStrong,
     paddingHorizontal: Spacing.three,
   },
   row: {

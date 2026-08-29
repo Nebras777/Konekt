@@ -5,7 +5,7 @@ import { useFocusEffect } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radii, Spacing, Surface, surfaceFor } from '@/constants/theme';
 import type { Reaction } from '@/constants/types';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -80,11 +80,14 @@ export default function ActivityScreen() {
           </ThemedView>
         ) : (
           <ScrollView contentContainerStyle={styles.list}>
-            {activity.map((item) => (
+            {activity.map((item, index) => (
               <ThemedView
                 key={item.id}
                 type={item.seen ? 'backgroundElement' : 'backgroundSelected'}
-                style={styles.row}>
+                style={[
+                  styles.row,
+                  item.seen ? { backgroundColor: surfaceFor(index) } : null,
+                ]}>
                 <ThemedText type="small" style={styles.rowText}>
                   {item.seen ? '' : '• '}
                   <ThemedText type="smallBold">{item.reactorName}</ThemedText> reacted “
@@ -116,6 +119,9 @@ const styles = StyleSheet.create({
   list: { gap: Spacing.two, paddingBottom: Spacing.four },
   row: {
     flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: Surface.border,
+    borderTopColor: Surface.borderStrong,
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two,
