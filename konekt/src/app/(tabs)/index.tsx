@@ -277,9 +277,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    // The inset lives on the row, so the logo and the bell share one margin.
+    // Previously each carried its own, which is why they didn't line up.
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.four,
   },
   bellWrapper: {
-    paddingHorizontal: Spacing.two,
+    // Vertical only: horizontal padding here would shift the bell in from the
+    // row's inset and break the alignment with the logo.
     paddingVertical: Spacing.one,
   },
   badge: {
@@ -321,13 +326,11 @@ const styles = StyleSheet.create({
     flex: 1,
     // The native tab bar occupies its own layout space, so reserving a full
     // BottomTabInset on top of it left the buttons floating high above it.
-    paddingBottom: Spacing.four,
+    paddingBottom: Spacing.one,
   },
   logo: {
     width: 140,
     height: 32,
-    marginHorizontal: Spacing.four,
-    marginTop: Spacing.four,
   },
   content: {
     padding: Spacing.four,
@@ -375,7 +378,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
     borderWidth: 2,
-    borderColor: '#A855FF',
+    borderColor: '#CBB6FF',
   },
   pressed: {
     opacity: 0.7,

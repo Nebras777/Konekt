@@ -17,7 +17,7 @@ export const Colors = {
     /** A white film over the indigo, which picks up the hue beneath. */
     backgroundElement: 'rgba(255,255,255,0.11)',
     /** Selected and pressed lift toward the brand periwinkle. */
-    backgroundSelected: 'rgba(0,229,255,0.28)',
+    backgroundSelected: 'rgba(203,182,255,0.30)',
     textSecondary: 'rgba(242,246,255,0.76)',
     /**
      * Amber, and deliberately the only warm thing in the palette. A cool ground
@@ -64,7 +64,7 @@ export const Accents = {
   magenta: '#FF2E97',
   lime: '#3DFF9A',
   yellow: '#FFE83D',
-  violet: '#A855FF',
+  lavender: '#CBB6FF',
 } as const;
 
 /**
@@ -119,7 +119,7 @@ export const AccentList = [
   Accents.magenta,
   Accents.lime,
   Accents.yellow,
-  Accents.violet,
+  Accents.lavender,
 ] as const;
 
 /**
