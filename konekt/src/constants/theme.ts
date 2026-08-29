@@ -13,12 +13,12 @@ export const Colors = {
      *  sitting on it as a neutral. */
     text: '#F2F6FF',
     /** The gradient's darkest stop. Cards sit above this, never below it. */
-    background: '#08091A',
+    background: '#141633',
     /** A white film over the indigo, which picks up the hue beneath. */
-    backgroundElement: 'rgba(255,255,255,0.11)',
+    backgroundElement: 'rgba(255,255,255,0.15)',
     /** Selected and pressed lift toward the brand periwinkle. */
     backgroundSelected: 'rgba(203,182,255,0.30)',
-    textSecondary: 'rgba(242,246,255,0.76)',
+    textSecondary: 'rgba(242,246,255,0.84)',
     /**
      * Amber, and deliberately the only warm thing in the palette. A cool ground
      * with a single warm accent is what makes the accent read as important —
@@ -32,7 +32,7 @@ export const Colors = {
 export const PrimaryText = '#04060F';
 export const PrimaryDark = '#00B8CC';
 
-export const TabBarSurface = '#181B40';
+export const TabBarSurface = '#272B62';
 
 /**
  * Background gradient: indigo night, lighter at the top.
@@ -44,7 +44,7 @@ export const TabBarSurface = '#181B40';
  * Lifted well off black: the darker version was heavy, and a mid indigo still
  * carries white text comfortably while letting the accents sing on top of it.
  */
-export const BackgroundGradient = ['#1B1D45', '#101230', '#08091A'] as const;
+export const BackgroundGradient = ['#2E3270', '#1E2150', '#141633'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -83,11 +83,11 @@ export const Danger = {
 } as const;
 
 export const Surface = {
-  border: 'rgba(255,255,255,0.16)',
+  border: 'rgba(255,255,255,0.22)',
   /** Brighter on top: a lit upper edge is what makes a flat panel look raised.
    *  Stronger here than on a lighter ground — a faint edge disappears entirely
    *  against near-black. */
-  borderStrong: 'rgba(255,255,255,0.40)',
+  borderStrong: 'rgba(255,255,255,0.50)',
   shadow: 'rgba(0,0,0,0.5)',
   /** An amber cast under the primary button, so it appears to glow. */
   glow: 'rgba(0,229,255,0.55)',
@@ -108,7 +108,7 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.135)', 'rgba(255,255,255,0.115)', 'rgba(255,255,255,0.155)'] as const;
+const CARD_TINTS = ['rgba(255,255,255,0.14)', 'rgba(255,255,255,0.175)', 'rgba(255,255,255,0.155)', 'rgba(255,255,255,0.195)'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];

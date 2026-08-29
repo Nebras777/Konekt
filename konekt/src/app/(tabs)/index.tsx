@@ -308,7 +308,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 8 },
-    elevation: 10,
+    // No elevation. On Android it gives the view a rectangular outline, which
+    // squares off the corners — the reason this button rendered as a sharp bar
+    // while every other pill on the screen was round. The iOS shadow above is
+    // unaffected; Android loses the drop shadow, which is the cheaper loss.
   },
   endDayButton: {
     alignItems: 'center',
@@ -368,7 +371,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
+    borderColor: 'rgba(255,255,255,0.55)',
+    backgroundColor: 'rgba(255,255,255,0.14)',
   },
   recapButton: {
     marginHorizontal: Spacing.four,
