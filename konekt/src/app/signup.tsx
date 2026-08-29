@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+import { setCurrentProfile } from '../../services/currentProfile';
 import { createProfile } from '../../services/profiles';
 
 export default function SignUpScreen() {
@@ -25,8 +26,15 @@ export default function SignUpScreen() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await createProfile(name.trim());
-      router.back();
+      const profile = await createProfile(name.trim());
+      await setCurrentProfile(profile);
+      // If signup was reached directly (deep link, or a refresh while on
+      // this screen) there's no history to go back to.
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/people');
+      }
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'Could not create your profile');
       setSubmitting(false);

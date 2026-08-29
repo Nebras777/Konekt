@@ -1,6 +1,7 @@
 import type { DaySummary, PlaceVisit } from '../src/constants/types';
 import { DEMO_USERS } from '../src/constants/types';
 import { generateDaySummary } from './aiSummary';
+import { getCurrentProfile } from './currentProfile';
 import { fillMissingPhotos } from './unsplash';
 
 type BuildRecapOptions = {
@@ -50,7 +51,8 @@ export async function buildDayRecap(
   places: PlaceVisit[],
   options: BuildRecapOptions = {},
 ): Promise<DaySummary> {
-  const userId = options.userId ?? DEMO_USERS.sender;
+  const profile = options.userId ? null : await getCurrentProfile();
+  const userId = options.userId ?? profile?.name ?? DEMO_USERS.sender;
   const recipientId = options.recipientId ?? DEMO_USERS.recipient;
   const date = options.date ?? todayISO();
 
@@ -59,9 +61,12 @@ export async function buildDayRecap(
     fillMissingPhotos(places),
   ]);
 
+  // userId doubles as the sender's display name (see recaps.tsx), but a
+  // freely-typed profile name isn't safe to use as-is in a Firestore doc id.
+  const idSafeUserId = userId.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'sender';
   const createdAt = Date.now();
   return {
-    id: `${userId}_${date}_${createdAt}`,
+    id: `${idSafeUserId}_${date}_${createdAt}`,
     userId,
     recipientId,
     date,
