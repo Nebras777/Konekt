@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { Radii, Spacing, Surface, tiltFor } from '@/constants/theme';
+import { Radii, softAccentFor, Spacing, Surface, tiltFor } from '@/constants/theme';
 import type { PlaceType } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -60,7 +60,9 @@ export function DayCard({
       <View style={styles.header}>
         <View style={styles.headerText}>
           <View style={styles.timeRow}>
-            <ThemedText style={styles.glyph}>{TYPE_GLYPH[placeType]}</ThemedText>
+            <View style={[styles.glyphBubble, { backgroundColor: softAccentFor(title) }]}>
+              <ThemedText style={styles.glyph}>{TYPE_GLYPH[placeType]}</ThemedText>
+            </View>
             <ThemedText type="smallBold" themeColor="textSecondary">
               {time}
             </ThemedText>
@@ -96,7 +98,7 @@ export function DayCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Radii.lg,
+    borderRadius: Radii.xl,
     padding: Spacing.three,
     gap: Spacing.two,
     // The accent lives on an edge rather than the fill, so the card stays
@@ -132,8 +134,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
+  glyphBubble: {
+    width: 34,
+    height: 34,
+    borderRadius: Radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   glyph: {
-    fontSize: 16,
+    fontSize: 17,
   },
   headerText: {
     flex: 1,

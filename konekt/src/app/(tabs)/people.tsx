@@ -10,6 +10,7 @@ import {
   Accents,
   BottomTabInset,
   Radii,
+  softAccentFor,
   Spacing,
   Surface,
 } from '@/constants/theme';
@@ -73,8 +74,8 @@ function ContactRow({
 
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
-      <View style={[styles.avatar, { backgroundColor: accentFor(name) }]}>
-        <ThemedText type="smallBold" style={styles.avatarText}>
+      <View style={[styles.avatar, { backgroundColor: softAccentFor(name) }]}>
+        <ThemedText type="smallBold" style={{ color: accentFor(name) }}>
           {initials(name)}
         </ThemedText>
       </View>
@@ -454,11 +455,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     gap: Spacing.three,
-  },
-  avatarText: {
-    // The accents are mid-tone in this scheme, not neon-light, so white
-    // initials read on all five where dark ones would not.
-    color: '#FFFFFF',
   },
   avatar: {
     width: 40,

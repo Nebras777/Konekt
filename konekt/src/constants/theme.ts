@@ -105,6 +105,35 @@ export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];
 }
 
+/**
+ * The accents at roughly a tenth strength, for filling shapes rather than
+ * drawing them. On a light page a saturated fill shouts; a wash of the same
+ * hue reads as friendly and still tells two things apart.
+ */
+export const SoftAccents = {
+  indigo: '#E7E9FB',
+  green: '#E1F4EC',
+  amber: '#FBF0DC',
+  rose: '#FBE7EE',
+  slate: '#ECEEF3',
+} as const;
+
+export const SoftAccentList = [
+  SoftAccents.indigo,
+  SoftAccents.green,
+  SoftAccents.amber,
+  SoftAccents.rose,
+  SoftAccents.slate,
+] as const;
+
+export function softAccentFor(key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return SoftAccentList[hash % SoftAccentList.length];
+}
+
 export const AccentList = [
   Accents.indigo,
   Accents.green,

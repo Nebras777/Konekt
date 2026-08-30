@@ -12,6 +12,7 @@ import {
   Accents,
   BottomTabInset,
   Radii,
+  SoftAccents,
   Spacing,
   Surface,
 } from '@/constants/theme';
@@ -27,7 +28,7 @@ import {
 } from '../../../services/reactions';
 import { getSavedRecapIds, saveRecap, unsaveRecap } from '../../../services/savedRecaps';
 
-import { REACTION_LABELS, type ReactionLabel } from '@/constants/types';
+import { REACTION_EMOJI, REACTION_LABELS, type ReactionLabel } from '@/constants/types';
 
 export default function RecapsScreen() {
   const { profile, loading: profileLoading } = useAuth();
@@ -253,10 +254,12 @@ function InboxRecap({
                   type={chosen ? 'backgroundSelected' : 'backgroundElement'}
                   style={[
                     styles.reactionChip,
-                    chosen && styles.reactionChipChosen,
+                    chosen && { backgroundColor: SoftAccents.rose, borderColor: Accents.rose },
                     pressed && styles.pressed,
                   ]}>
-                  <ThemedText type="smallBold">{chosen ? `✓ ${label}` : label}</ThemedText>
+                  <ThemedText type="smallBold">
+                    {REACTION_EMOJI[label]} {label}
+                  </ThemedText>
                 </ThemedView>
               )}
             </Pressable>

@@ -117,6 +117,13 @@ export type ReactionLabel = 'Love it' | 'Proud' | 'Call me';
 
 export const REACTION_LABELS: ReactionLabel[] = ['Love it', 'Proud', 'Call me'];
 
+/** A face per reaction. Nobody reads a reaction row — they scan it. */
+export const REACTION_EMOJI: Record<ReactionLabel, string> = {
+  'Love it': '❤️',
+  Proud: '🌟',
+  'Call me': '📞',
+};
+
 /**
  * One person's reaction to one recap. Doubles as the sender's notification:
  * there is no separate notifications collection, because a notification here is

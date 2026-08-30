@@ -11,10 +11,10 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
-  AccentList,
   Danger,
   PrimaryText,
   Radii,
+  SoftAccentList,
   Spacing,
   Surface,
 } from '@/constants/theme';
@@ -158,9 +158,9 @@ export default function TodayScreen() {
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
-            <Stat label="km" value={stats.km} accent={AccentList[0]} tilt="-1.5deg" />
-            <Stat label="stops" value={stats.stops} accent={AccentList[1]} tilt="1deg" />
-            <Stat label="photos" value={stats.photos} accent={AccentList[2]} tilt="-0.8deg" />
+            <Stat label="km" value={stats.km} accent={SoftAccentList[0]} tilt="-1.5deg" />
+            <Stat label="stops" value={stats.stops} accent={SoftAccentList[1]} tilt="1deg" />
+            <Stat label="photos" value={stats.photos} accent={SoftAccentList[3]} tilt="-0.8deg" />
           </View>
 
           {isEmpty ? (
@@ -265,7 +265,8 @@ function Stat({
   tilt: string;
 }) {
   return (
-    <ThemedView type="backgroundElement" style={[styles.statTile, { transform: [{ rotate: tilt }] }]}>
+    <View
+      style={[styles.statTile, { backgroundColor: accent, transform: [{ rotate: tilt }] }]}>
 
       <ThemedText type="title" style={styles.statValue}>
         {value}
@@ -273,7 +274,7 @@ function Stat({
       <ThemedText type="small" themeColor="textSecondary">
         {label}
       </ThemedText>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -387,9 +388,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     borderRadius: Radii.xl,
-    borderWidth: Surface.borderWidth,
-    borderColor: Surface.borderStrong,
-    borderTopColor: 'rgba(255,255,255,0.55)',
     paddingVertical: Spacing.three,
     gap: Spacing.half,
   },
