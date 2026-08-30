@@ -2,7 +2,14 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BellIcon } from '@/components/bell-icon';
@@ -12,10 +19,10 @@ import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
+  AccentList,
   Danger,
   PrimaryText,
   Radii,
-  SoftAccentList,
   Spacing,
   Surface,
 } from '@/constants/theme';
@@ -159,9 +166,27 @@ export default function TodayScreen() {
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.statsRow}>
-            <Stat label="km" value={stats.km} accent={SoftAccentList[0]} tilt="-1.5deg" />
-            <Stat label="stops" value={stats.stops} accent={SoftAccentList[1]} tilt="1deg" />
-            <Stat label="photos" value={stats.photos} accent={SoftAccentList[3]} tilt="-0.8deg" />
+            <Stat
+              label="km"
+              value={stats.km}
+              accent={AccentList[0]}
+              tilt="-1.5deg"
+              heavy={{ borderLeftWidth: 5, borderBottomWidth: 5 }}
+            />
+            <Stat
+              label="stops"
+              value={stats.stops}
+              accent={AccentList[1]}
+              tilt="1deg"
+              heavy={{ borderTopWidth: 5, borderRightWidth: 5 }}
+            />
+            <Stat
+              label="photos"
+              value={stats.photos}
+              accent={AccentList[2]}
+              tilt="-0.8deg"
+              heavy={{ borderRightWidth: 5, borderBottomWidth: 5 }}
+            />
           </View>
 
           {isEmpty ? (
@@ -259,16 +284,27 @@ function Stat({
   value,
   accent,
   tilt,
+  heavy,
 }: {
   label: string;
   value: string;
   accent: string;
   tilt: string;
+  /**
+   * Which two sides get the thick stroke. Uneven on purpose, and different per
+   * tile — an even border reads as a box, while a stroke that thickens on two
+   * adjacent sides reads as something drawn by hand.
+   */
+  heavy: ViewStyle;
 }) {
   return (
     <ThemedView
       type="backgroundElement"
-      style={[styles.statTile, { transform: [{ rotate: tilt }] }]}>
+      style={[
+        styles.statTile,
+        { borderColor: accent, transform: [{ rotate: tilt }] },
+        heavy,
+      ]}>
 
       <ThemedText type="title" style={styles.statValue}>
         {value}
@@ -390,8 +426,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     borderRadius: Radii.xl,
-    borderWidth: Surface.borderWidth,
-    borderColor: Surface.border,
+    // The thin stroke all round; `heavy` thickens two sides of it per tile.
+    borderWidth: 1.5,
     paddingVertical: Spacing.three,
     gap: Spacing.half,
   },
