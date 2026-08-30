@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -146,7 +145,7 @@ export default function TodayScreen() {
             }>
             {({ pressed }) => (
               <View style={[styles.bellWrapper, pressed && styles.pressed]}>
-                <BellIcon color="#00E5FF" />
+                <BellIcon color={theme.text} />
                 {unseenCount > 0 ? (
                   <ThemedView type="backgroundSelected" style={styles.badge}>
                     <ThemedText type="small">{unseenCount > 9 ? '9+' : unseenCount}</ThemedText>
@@ -178,15 +177,11 @@ export default function TodayScreen() {
 
           <Pressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
             {({ pressed }) => (
-              <LinearGradient
-                colors={['#00E5FF', '#3DFF9A']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
+              <View style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
                 <ThemedText type="smallBold" style={{ color: PrimaryText }}>
                   {isCapturing ? 'Finding you…' : 'Capture this place'}
                 </ThemedText>
-              </LinearGradient>
+              </View>
             )}
           </Pressable>
 
@@ -271,8 +266,8 @@ function Stat({
 }) {
   return (
     <ThemedView type="backgroundElement" style={[styles.statTile, { transform: [{ rotate: tilt }] }]}>
-      <View style={[styles.statDot, { backgroundColor: accent }]} />
-      <ThemedText type="title" style={[styles.statValue, { color: accent }]}>
+
+      <ThemedText type="title" style={styles.statValue}>
         {value}
       </ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
@@ -315,8 +310,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
-    // Filled with a gradient, not a flat colour. This is the one thing a person
-    // opens the app to do, and it should look like it.
+    // Ink, matching the reference. The primary action carries weight through
+    // contrast against a pale page rather than through colour.
+    backgroundColor: '#151823',
     shadowColor: Surface.glow,
     shadowOpacity: 1,
     shadowRadius: 20,
@@ -351,20 +347,15 @@ const styles = StyleSheet.create({
      * artwork was drawn for, without recolouring the logo and losing its
      * gradient.
      */
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'transparent',
     borderRadius: Radii.pill,
     // Tighter on the left: the mark's artwork already carries its own padding,
     // so an equal inset on both sides looks lopsided.
-    paddingLeft: Spacing.two,
-    paddingRight: Spacing.three,
     paddingVertical: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.one,
-    shadowColor: 'rgba(255,255,255,0.65)',
-    shadowOpacity: 1,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 0 },
+
   },
   logoMark: {
     /**
@@ -421,8 +412,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.55)',
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderColor: Surface.borderStrong,
+    backgroundColor: '#F4F5FA',
   },
   recapButton: {
     marginHorizontal: Spacing.four,
@@ -431,8 +422,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
-    borderWidth: 2,
-    borderColor: '#CBB6FF',
+    borderWidth: Surface.borderWidth,
+    borderColor: Surface.borderStrong,
+    backgroundColor: '#FFFFFF',
   },
   pressed: {
     opacity: 0.7,

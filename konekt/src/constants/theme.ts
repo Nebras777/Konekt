@@ -9,42 +9,35 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** Cool white with a blue cast, so it belongs to the indigo rather than
-     *  sitting on it as a neutral. */
-    text: '#F2F6FF',
-    /** The gradient's darkest stop. Cards sit above this, never below it. */
-    background: '#141633',
-    /** A white film over the indigo, which picks up the hue beneath. */
-    backgroundElement: 'rgba(255,255,255,0.15)',
-    /** Selected and pressed lift toward the brand periwinkle. */
-    backgroundSelected: 'rgba(203,182,255,0.30)',
-    textSecondary: 'rgba(242,246,255,0.84)',
-    /**
-     * Amber, and deliberately the only warm thing in the palette. A cool ground
-     * with a single warm accent is what makes the accent read as important —
-     * five competing brights read as decoration.
-     */
-    primary: '#00E5FF',
+    /** Near-black, warmed very slightly so it doesn't look like pure #000. */
+    text: '#111318',
+    /** The pale periwinkle page the cards sit on. */
+    background: '#E9EDFB',
+    /** Cards are plain white. On a pale ground that is all the separation they
+     *  need — no film, no tint. */
+    backgroundElement: '#FFFFFF',
+    /** Unselected chips and pressed states: a light grey, not a colour. */
+    backgroundSelected: '#EFF1F7',
+    textSecondary: '#6B7280',
+    /** Near-black. Primary actions and switches are ink, not an accent. */
+    primary: '#151823',
   },
 } as const;
 
-/** Text on a filled primary button. Amber is light, so dark text sits on it. */
-export const PrimaryText = '#04060F';
-export const PrimaryDark = '#00B8CC';
+/** Text on a filled primary button. */
+export const PrimaryText = '#FFFFFF';
+export const PrimaryDark = '#000000';
 
-export const TabBarSurface = '#272B62';
+export const TabBarSurface = '#FFFFFF';
 
 /**
- * Background gradient: indigo night, lighter at the top.
+ * Background gradient: a shallow periwinkle wash, lighter at the top.
  *
- * Indigo rather than violet because the logo runs periwinkle to navy — a violet
- * ground put the wordmark in a neighbouring hue that never quite agreed with
- * it. Light above dark reads as depth rather than as a colour wash.
- *
- * Lifted well off black: the darker version was heavy, and a mid indigo still
- * carries white text comfortably while letting the accents sing on top of it.
+ * Deliberately narrow. In this scheme the colour lives in the page and
+ * everything on it is white, black or grey — a wide gradient would pull
+ * attention away from content that has almost none of its own.
  */
-export const BackgroundGradient = ['#2E3270', '#1E2150', '#141633'] as const;
+export const BackgroundGradient = ['#EDF1FD', '#E5EAFA', '#DCE2F8'] as const;
 
 export type ThemeColor = keyof typeof Colors.light;
 
@@ -55,16 +48,15 @@ export type ThemeColor = keyof typeof Colors.light;
  */
 export const Accents = {
   /**
-   * Neon: high saturation and high lightness both, which is what separates a
-   * neon from a merely bright colour. They only work over a near-black ground —
-   * the same values on the previous mid indigo would have looked garish rather
-   * than lit.
+   * Muted, and used sparingly. This scheme is near-monochrome: colour appears
+   * on status dots and avatars, not on numbers or card edges. Saturated
+   * accents would fight a palette whose whole point is restraint.
    */
-  cyan: '#00E5FF',
-  magenta: '#FF2E97',
-  lime: '#3DFF9A',
-  yellow: '#FFE83D',
-  lavender: '#CBB6FF',
+  green: '#22A366',
+  indigo: '#4F5BD5',
+  amber: '#C98A16',
+  rose: '#D2517A',
+  slate: '#5B6478',
 } as const;
 
 /**
@@ -74,23 +66,18 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  /** No red was specified in the palette, so this is chosen to sit beside the
-   *  violet rather than clash with it — slightly rose, not fire-engine. */
-  fill: '#FF4D6D',
-  border: 'rgba(224,82,96,0.35)',
-  /** Text on the red fill. The theme's text colour is dark and unreadable on it. */
+  fill: '#D92D3A',
+  border: 'rgba(217,45,58,0.35)',
   text: '#FFFFFF',
 } as const;
 
 export const Surface = {
-  border: 'rgba(255,255,255,0.22)',
-  /** Brighter on top: a lit upper edge is what makes a flat panel look raised.
-   *  Stronger here than on a lighter ground — a faint edge disappears entirely
-   *  against near-black. */
-  borderStrong: 'rgba(255,255,255,0.50)',
-  shadow: 'rgba(0,0,0,0.5)',
-  /** An amber cast under the primary button, so it appears to glow. */
-  glow: 'rgba(0,229,255,0.55)',
+  /** A faint ink hairline. White cards on a pale ground barely need one. */
+  border: 'rgba(17,19,24,0.08)',
+  borderStrong: 'rgba(17,19,24,0.12)',
+  /** Soft and blue-grey, so shadows sit in the page rather than greying it. */
+  shadow: 'rgba(40,50,90,0.10)',
+  glow: 'rgba(21,24,35,0.18)',
   borderWidth: 1,
 } as const;
 
@@ -108,18 +95,18 @@ export const Radii = {
  * would otherwise all sit at the same opacity, which is the flatness this is
  * meant to avoid.
  */
-const CARD_TINTS = ['rgba(255,255,255,0.14)', 'rgba(255,255,255,0.175)', 'rgba(255,255,255,0.155)', 'rgba(255,255,255,0.195)'] as const;
+const CARD_TINTS = ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'] as const;
 
 export function surfaceFor(index: number): string {
   return CARD_TINTS[index % CARD_TINTS.length];
 }
 
 export const AccentList = [
-  Accents.cyan,
-  Accents.magenta,
-  Accents.lime,
-  Accents.yellow,
-  Accents.lavender,
+  Accents.indigo,
+  Accents.green,
+  Accents.amber,
+  Accents.rose,
+  Accents.slate,
 ] as const;
 
 /**
@@ -139,7 +126,7 @@ export function accentFor(key: string): string {
  * rather than machine-stacked. Kept under two degrees: past that, text starts to
  * look like a mistake rather than a choice.
  */
-export const TILTS = ['-1.2deg', '0.9deg', '-0.6deg', '1.4deg'] as const;
+export const TILTS = ['0deg'] as const;
 
 export function tiltFor(index: number): string {
   return TILTS[index % TILTS.length];

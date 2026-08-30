@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#141633",
+          "backgroundColor": "#E9EDFB",
           "image": "./assets/images/logo-mark.png",
           "imageWidth": 140
         }

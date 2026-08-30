@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Accents, BottomTabInset, Radii, Spacing, Surface } from '@/constants/theme';
@@ -84,7 +83,7 @@ export default function PrivacyScreen() {
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <ScreenTitle accent={Accents.lavender}>Privacy</ScreenTitle>
+          <ThemedText type="title">Privacy</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             Your location stays on this phone until you send a recap.
           </ThemedText>
@@ -112,8 +111,8 @@ export default function PrivacyScreen() {
                 value={settings[key]}
                 onValueChange={() => toggle(key)}
                 disabled={!loaded || !profile}
-                trackColor={{ true: theme.primary, false: 'rgba(255,255,255,0.22)' }}
-                thumbColor={settings[key] ? Accents.cyan : '#B9BCD6'}
+                trackColor={{ true: theme.primary, false: '#D7DAE4' }}
+                thumbColor={settings[key] ? '#FFFFFF' : '#F4F5F8'}
               />
             </View>
           ))}

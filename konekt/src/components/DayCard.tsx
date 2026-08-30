@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { accentFor, Radii, Spacing, Surface, surfaceFor, tiltFor } from '@/constants/theme';
+import { Radii, Spacing, Surface, tiltFor } from '@/constants/theme';
 import type { PlaceType } from '@/constants/types';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -54,11 +54,7 @@ export function DayCard({
       type="backgroundElement"
       style={[
         styles.card,
-        {
-          transform: [{ rotate: tiltFor(index) }],
-          borderLeftColor: accentFor(title),
-          backgroundColor: surfaceFor(index),
-        },
+        { transform: [{ rotate: tiltFor(index) }] },
         excluded && styles.cardExcluded,
       ]}>
       <View style={styles.header}>
@@ -111,7 +107,7 @@ const styles = StyleSheet.create({
     borderTopWidth: Surface.borderWidth,
     borderRightWidth: Surface.borderWidth,
     borderBottomWidth: Surface.borderWidth,
-    borderTopColor: Surface.borderStrong,
+    borderTopColor: Surface.border,
     borderRightColor: Surface.border,
     borderBottomColor: Surface.border,
     // Tilted cards would otherwise clip their neighbours' corners.

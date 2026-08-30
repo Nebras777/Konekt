@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
@@ -234,7 +233,7 @@ export default function PeopleScreen() {
   return (
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScreenTitle accent={Accents.cyan}>People</ScreenTitle>
+        <ThemedText type="title">People</ThemedText>
 
         <ScrollView
           style={styles.scroll}
@@ -422,7 +421,7 @@ const styles = StyleSheet.create({
   groupChip: {
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.28)',
+    borderColor: 'rgba(17,19,24,0.12)',
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.half,
   },
@@ -434,7 +433,7 @@ const styles = StyleSheet.create({
   inviteChip: {
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(0,229,255,0.65)',
+    borderColor: 'rgba(17,19,24,0.20)',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },
@@ -457,9 +456,9 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   avatarText: {
-    // Neons are high-lightness, so dark initials read on all five; white would
-    // disappear on the cyan, lime and yellow.
-    color: '#04060F',
+    // The accents are mid-tone in this scheme, not neon-light, so white
+    // initials read on all five where dark ones would not.
+    color: '#FFFFFF',
   },
   avatar: {
     width: 40,

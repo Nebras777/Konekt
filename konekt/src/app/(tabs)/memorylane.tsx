@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
-import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { accentFor, Accents, BottomTabInset, Spacing } from '@/constants/theme';
@@ -95,7 +94,7 @@ export default function MemoryLaneScreen() {
   return (
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScreenTitle accent={Accents.lime}>Memory Lane</ScreenTitle>
+        <ThemedText type="title">Memory Lane</ThemedText>
 
         {days === null ? (
           <View style={styles.centre}>

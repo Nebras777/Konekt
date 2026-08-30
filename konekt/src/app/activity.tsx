@@ -60,7 +60,7 @@ export default function ActivityScreen() {
             {({ pressed }) => (
               <ThemedText
                 type="smallBold"
-                style={[{ color: Accents.cyan }, pressed ? styles.pressed : undefined]}>
+                style={[{ color: Accents.indigo }, pressed ? styles.pressed : undefined]}>
                 Mark all read
               </ThemedText>
             )}
@@ -87,7 +87,7 @@ export default function ActivityScreen() {
                   styles.row,
                   item.seen
                     ? { backgroundColor: surfaceFor(index) }
-                    : { borderColor: Accents.cyan, borderWidth: 2 },
+                    : { borderColor: Accents.indigo, borderWidth: 2 },
                 ]}>
                 <ThemedText type="small" style={styles.rowText}>
                   {item.seen ? '' : '• '}

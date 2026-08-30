@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -262,15 +261,11 @@ export function RecapScreenContent({ daySummary, readOnly = false }: RecapScreen
                   disabled={sending}
                   style={styles.primaryButtonWrapper}>
                   {({ pressed }) => (
-                    <LinearGradient
-                      colors={['#00E5FF', '#3DFF9A']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={[styles.primaryButton, pressed && styles.pressed]}>
+                    <View style={[styles.primaryButton, pressed && styles.pressed]}>
                       <ThemedText type="smallBold" style={{ color: PrimaryText }}>
                         {sending ? 'Sending…' : sendLabel}
                       </ThemedText>
-                    </LinearGradient>
+                    </View>
                   )}
                 </Pressable>
               </View>
@@ -448,6 +443,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
+    backgroundColor: '#151823',
   },
   pressed: {
     opacity: 0.7,

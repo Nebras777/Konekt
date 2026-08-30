@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
-import { ScreenTitle } from '@/components/screen-title';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
@@ -152,7 +151,7 @@ export default function RecapsScreen() {
   return (
     <ThemedView gradient style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScreenTitle accent={Accents.magenta}>Recaps</ScreenTitle>
+        <ThemedText type="title">Recaps</ThemedText>
 
         {summaries && summaries.length > 0 ? (
           <View style={styles.filterRow}>
@@ -169,7 +168,7 @@ export default function RecapsScreen() {
                       type={active ? 'backgroundSelected' : 'backgroundElement'}
                       style={[
                         styles.filterChip,
-                        active && { borderColor: Accents.magenta, borderWidth: 2 },
+                        active && { borderColor: Accents.slate, borderWidth: 2 },
                         pressed && styles.pressed,
                       ]}>
                       <ThemedText type="smallBold">{label}</ThemedText>
@@ -392,7 +391,7 @@ const styles = StyleSheet.create({
   filterChip: {
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.30)',
+    borderColor: 'rgba(17,19,24,0.12)',
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
   },
@@ -408,7 +407,7 @@ const styles = StyleSheet.create({
   saveChip: {
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,232,61,0.75)',
+    borderColor: 'rgba(17,19,24,0.25)',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },
@@ -426,7 +425,7 @@ const styles = StyleSheet.create({
   reactionChip: {
     borderRadius: Radii.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.30)',
+    borderColor: 'rgba(17,19,24,0.12)',
     alignItems: 'center',
     paddingVertical: Spacing.two,
   },
