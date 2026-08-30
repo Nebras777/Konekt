@@ -8,13 +8,13 @@ export default function AppTabs() {
   return (
     <NativeTabs
       backgroundColor={TabBarSurface}
-      // The platform tints icons with its own default, which came out nearly as
-      // dark as the bar itself. Set explicitly so they read as white.
-      iconColor="#EDF3FF"
-      indicatorColor="rgba(0,229,255,0.28)"
+      // Ink, not white: the bar is white in this scheme, so the near-white
+      // icons of the dark theme would have disappeared into it.
+      iconColor={colors.text}
+      indicatorColor="#EFF1F7"
       labelStyle={{
-        color: 'rgba(237,243,255,0.78)',
-        selected: { color: '#FFFFFF' },
+        color: colors.textSecondary,
+        selected: { color: colors.text },
       }}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Today</NativeTabs.Trigger.Label>

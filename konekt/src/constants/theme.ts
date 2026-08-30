@@ -66,9 +66,13 @@ export const Accents = {
  */
 /** Destructive actions. Kept out of Accents, which are decorative. */
 export const Danger = {
-  fill: '#D92D3A',
-  border: 'rgba(217,45,58,0.35)',
-  text: '#FFFFFF',
+  /** A pale wash, not a solid red. On a light page a saturated fill would be
+   *  the loudest thing on the screen, and ending the day is not the point of
+   *  it. Text sits in the deep red instead, which is what carries the warning. */
+  fill: '#FDECEE',
+  border: '#F3C3C8',
+  /** Deep red text on the wash. White would be unreadable on a tint this pale. */
+  text: '#B3242F',
 } as const;
 
 export const Surface = {

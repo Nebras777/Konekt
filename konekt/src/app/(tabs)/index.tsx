@@ -241,7 +241,7 @@ export default function TodayScreen() {
           <Pressable onPress={confirmEndDay} accessibilityRole="button">
             {({ pressed }) => (
               <View style={[styles.endDayButton, pressed && styles.pressed]}>
-                <ThemedText type="smallBold" style={{ color: Danger.fill }}>
+                <ThemedText type="smallBold" style={{ color: Danger.text }}>
                   End day
                 </ThemedText>
               </View>
@@ -326,12 +326,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.three,
     borderRadius: Radii.pill,
-    // Outlined rather than filled: a solid red block competes with the primary
-    // action and shouts about a step that isn't why anyone opened the screen.
-    // It still reads as destructive without being the loudest thing on it.
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: Danger.fill,
+    // Filled with a pale red wash and a deeper red edge. It reads as
+    // destructive without competing with the ink primary above it.
+    backgroundColor: Danger.fill,
+    borderWidth: Surface.borderWidth,
+    borderColor: Danger.border,
     marginTop: Spacing.two,
   },
   safeArea: {
