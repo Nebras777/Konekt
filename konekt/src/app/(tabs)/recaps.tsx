@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
+import { BouncyPressable } from '@/components/bouncy-pressable';
 import RouteMap, { hasPosition } from '@/components/RouteMap';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -243,7 +244,7 @@ function InboxRecap({
         {REACTION_LABELS.map((label) => {
           const chosen = myReaction === label;
           return (
-            <Pressable
+            <BouncyPressable
               key={label}
               onPress={() => onReact(label)}
               accessibilityRole="button"
@@ -262,7 +263,7 @@ function InboxRecap({
                   </ThemedText>
                 </ThemedView>
               )}
-            </Pressable>
+            </BouncyPressable>
           );
         })}
       </View>
@@ -271,7 +272,7 @@ function InboxRecap({
         <ThemedText type="subtitle" style={styles.titleText}>
           {summary.senderName ?? summary.userId}&apos;s day
         </ThemedText>
-        <Pressable
+        <BouncyPressable
           onPress={onToggleSave}
           accessibilityRole="button"
           accessibilityLabel={saved ? 'Remove from saved' : 'Save this recap'}>
@@ -282,7 +283,7 @@ function InboxRecap({
               <ThemedText type="smallBold">{saved ? '★ Saved' : '☆ Save'}</ThemedText>
             </ThemedView>
           )}
-        </Pressable>
+        </BouncyPressable>
       </View>
       <ThemedText themeColor="textSecondary">{summary.summaryText}</ThemedText>
 

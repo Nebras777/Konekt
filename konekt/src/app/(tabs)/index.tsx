@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BellIcon } from '@/components/bell-icon';
+import { BouncyPressable } from '@/components/bouncy-pressable';
 import { DayCard } from '@/components/DayCard';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { ThemedText } from '@/components/themed-text';
@@ -175,7 +176,7 @@ export default function TodayScreen() {
             </ThemedText>
           ) : null}
 
-          <Pressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
+          <BouncyPressable onPress={capture} disabled={isCapturing} accessibilityRole="button">
             {({ pressed }) => (
               <View style={[styles.captureButton, (pressed || isCapturing) && styles.pressed]}>
                 <ThemedText type="smallBold" style={{ color: PrimaryText }}>
@@ -183,7 +184,7 @@ export default function TodayScreen() {
                 </ThemedText>
               </View>
             )}
-          </Pressable>
+          </BouncyPressable>
 
           <View style={styles.stopsList}>
             {route.map((place, index) => {
@@ -265,8 +266,9 @@ function Stat({
   tilt: string;
 }) {
   return (
-    <View
-      style={[styles.statTile, { backgroundColor: accent, transform: [{ rotate: tilt }] }]}>
+    <ThemedView
+      type="backgroundElement"
+      style={[styles.statTile, { transform: [{ rotate: tilt }] }]}>
 
       <ThemedText type="title" style={styles.statValue}>
         {value}
@@ -274,7 +276,7 @@ function Stat({
       <ThemedText type="small" themeColor="textSecondary">
         {label}
       </ThemedText>
-    </View>
+    </ThemedView>
   );
 }
 
@@ -388,6 +390,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     borderRadius: Radii.xl,
+    borderWidth: Surface.borderWidth,
+    borderColor: Surface.border,
     paddingVertical: Spacing.three,
     gap: Spacing.half,
   },

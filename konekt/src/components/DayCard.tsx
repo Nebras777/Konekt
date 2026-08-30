@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -50,6 +51,10 @@ export function DayCard({
   const included = !excluded;
 
   return (
+    <Animated.View
+      // Staggered by position, so a list builds rather than snapping in whole.
+      // 60ms apart is enough to read as sequence without feeling slow.
+      entering={FadeInDown.delay(Math.min(index, 6) * 60).springify().damping(18)}>
     <ThemedView
       type="backgroundElement"
       style={[
@@ -93,6 +98,7 @@ export function DayCard({
 
       {children}
     </ThemedView>
+    </Animated.View>
   );
 }
 

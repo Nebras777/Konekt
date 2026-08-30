@@ -4,7 +4,7 @@ import { StyleSheet, View, type DimensionValue } from 'react-native';
 
 import { ThemedView } from './themed-view';
 
-import { Spacing } from '@/constants/theme';
+import { Radii, Spacing } from '@/constants/theme';
 
 export type PhotoGridItem = {
   uri: string;
@@ -30,18 +30,21 @@ export function PhotoGrid({ photos, columns = 3 }: PhotoGridProps) {
   // meant for a multi-photo grid.
   const effectiveColumns = Math.min(columns, photos.length);
   const tileWidth: DimensionValue = `${100 / effectiveColumns}%`;
+  // One photo gets a wide, letterbox crop rather than a square: it is the
+  // subject of the card, and a square thumbnail reads as an attachment.
+  const single = photos.length === 1;
 
   return (
     <View style={styles.grid}>
       {photos.map((photo, index) => {
         const { uri, type } = normalize(photo);
         return type === 'video' ? (
-          <VideoTile key={`${uri}-${index}`} uri={uri} width={tileWidth} />
+          <VideoTile key={`${uri}-${index}`} uri={uri} width={tileWidth} single={single} />
         ) : (
           <ThemedView
             key={`${uri}-${index}`}
             type="backgroundSelected"
-            style={[styles.tile, { width: tileWidth }]}>
+            style={[styles.tile, single && styles.tileSingle, { width: tileWidth }]}>
             <Image source={{ uri }} style={styles.media} contentFit="cover" />
           </ThemedView>
         );
@@ -50,7 +53,15 @@ export function PhotoGrid({ photos, columns = 3 }: PhotoGridProps) {
   );
 }
 
-function VideoTile({ uri, width }: { uri: string; width: DimensionValue }) {
+function VideoTile({
+  uri,
+  width,
+  single,
+}: {
+  uri: string;
+  width: DimensionValue;
+  single: boolean;
+}) {
   // Muted, non-looping, not auto-playing: the native controls (which include
   // their own fullscreen button — see expo-video's FullscreenOptions, default
   // enable: true) own all interaction here. A custom Pressable overlay was
@@ -61,7 +72,9 @@ function VideoTile({ uri, width }: { uri: string; width: DimensionValue }) {
   });
 
   return (
-    <ThemedView type="backgroundSelected" style={[styles.tile, { width }]}>
+    <ThemedView
+      type="backgroundSelected"
+      style={[styles.tile, single && styles.tileSingle, { width }]}>
       <VideoView player={player} style={styles.media} contentFit="cover" nativeControls />
     </ThemedView>
   );
@@ -71,12 +84,16 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.one,
+    gap: Spacing.two,
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: Spacing.two,
+    borderRadius: Radii.md,
     overflow: 'hidden',
+  },
+  tileSingle: {
+    aspectRatio: 4 / 3,
+    borderRadius: Radii.lg,
   },
   media: {
     width: '100%',
